@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Metadata } from "next";
 import { Award, Leaf, Lightbulb, Heart, Shield, Handshake, CheckCircle } from "lucide-react";
 import Header from "@/components/layout/Header";
@@ -66,15 +67,13 @@ export default function AboutPage() {
                   conditioners, and crop protection solutions.
                 </p>
               </div>
-              <div className="rounded-2xl bg-gradient-to-br from-brand-light to-brand-section h-80 lg:h-96 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-20 h-20 rounded-full bg-brand-primary/10 flex items-center justify-center mx-auto mb-3">
-                    <Leaf className="w-10 h-10 text-brand-primary" />
-                  </div>
-                  <p className="text-sm font-medium text-brand-primary">
-                    Our Manufacturing Facility
-                  </p>
-                </div>
+              <div className="relative rounded-2xl bg-brand-light h-80 lg:h-96 overflow-hidden">
+                <Image
+                  src="https://images.unsplash.com/photo-1655130944329-b3a63166f6b5?q=80&w=1933&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                  alt="Our Manufacturing Facility"
+                  fill
+                  className="object-cover"
+                />
               </div>
             </div>
           </div>
@@ -236,15 +235,13 @@ export default function AboutPage() {
                   ))}
                 </div>
               </div>
-              <div className="rounded-2xl bg-gradient-to-br from-brand-light to-brand-section h-72 lg:h-80 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-20 h-20 rounded-full bg-brand-primary/10 flex items-center justify-center mx-auto mb-3">
-                    <Shield className="w-10 h-10 text-brand-primary" />
-                  </div>
-                  <p className="text-sm font-medium text-brand-primary">
-                    Quality Testing Lab
-                  </p>
-                </div>
+              <div className="relative rounded-2xl bg-brand-light h-72 lg:h-80 overflow-hidden">
+                <Image
+                  src="https://images.unsplash.com/photo-1587620962725-abab7fe55159?auto=format&fit=crop&w=800&q=80"
+                  alt="Quality Testing Lab"
+                  fill
+                  className="object-cover"
+                />
               </div>
             </div>
           </div>

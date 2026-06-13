@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Product } from "@/lib/data";
@@ -9,14 +10,14 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-brand-border overflow-hidden group hover:shadow-md transition-shadow">
-      {/* Image placeholder */}
-      <div className="relative h-48 bg-gradient-to-br from-brand-light to-brand-section flex items-center justify-center overflow-hidden">
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-full bg-brand-primary/10 flex items-center justify-center mx-auto mb-2">
-            <span className="text-2xl">🌱</span>
-          </div>
-          <p className="text-xs font-medium text-brand-primary">{product.category}</p>
-        </div>
+      <div className="relative h-48 bg-brand-light flex items-center justify-center overflow-hidden">
+        <Image
+          src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80"
+          alt={product.name}
+          fill
+          className="object-cover group-hover:scale-105 transition-transform duration-300"
+        />
+        <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-300" />
       </div>
 
       {/* Content */}

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { MapPin, Calendar, Camera } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { fieldReports } from "@/lib/data";
@@ -20,9 +21,14 @@ export default function FieldReportsPage() {
             key={report.id}
             className="bg-white rounded-2xl p-5 shadow-sm border border-brand-border hover:shadow-md transition-shadow"
           >
-            {/* Photo placeholder */}
-            <div className="h-32 rounded-xl bg-gradient-to-br from-brand-light to-brand-section flex items-center justify-center mb-4">
-              <Camera className="w-8 h-8 text-brand-primary/30" />
+            {/* Photo */}
+            <div className="relative h-32 rounded-xl bg-brand-light overflow-hidden mb-4">
+              <Image
+                src={`https://images.unsplash.com/photo-1553484771-689277e6fa16?auto=format&fit=crop&w=400&q=80&sig=${report.id}`}
+                alt="Field Report Photo"
+                fill
+                className="object-cover"
+              />
             </div>
 
             <div className="flex items-center justify-between mb-3">

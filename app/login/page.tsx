@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Leaf, Eye, EyeOff, Info } from "lucide-react";
@@ -21,7 +22,14 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left - Image */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-brand-dark via-[#1a3a2a] to-brand-dark relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+        <Image
+          src="https://images.unsplash.com/photo-1613560361120-25c33e26c40a?auto=format&fit=crop&w=1200&q=80"
+          alt="Agriculture Background"
+          fill
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-brand-dark/85" />
         {/* Background decoration */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-20 left-20 w-64 h-64 bg-brand-primary rounded-full blur-[100px]" />

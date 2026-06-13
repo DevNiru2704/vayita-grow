@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Leaf, Sprout, TrendingUp, Droplets, Mountain, ShieldCheck, Factory, FlaskConical, Users, Truck, MapPin } from "lucide-react";
 import Header from "@/components/layout/Header";
@@ -87,18 +88,13 @@ export default function HomePage() {
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               {/* Image placeholder */}
               <div className="relative">
-                <div className="rounded-2xl bg-gradient-to-br from-brand-light to-brand-section h-80 lg:h-96 flex items-center justify-center overflow-hidden">
-                  <div className="text-center">
-                    <div className="w-20 h-20 rounded-full bg-brand-primary/10 flex items-center justify-center mx-auto mb-3">
-                      <Leaf className="w-10 h-10 text-brand-primary" />
-                    </div>
-                    <p className="text-sm font-medium text-brand-primary">
-                      VayitaGrow BioOrganics
-                    </p>
-                    <p className="text-xs text-brand-body mt-1">
-                      Manufacturing Facility
-                    </p>
-                  </div>
+                <div className="rounded-2xl bg-brand-light h-80 lg:h-96 flex items-center justify-center overflow-hidden">
+                  <Image
+                    src="https://images.unsplash.com/photo-1710666184386-9f42d0227237?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                    alt="VayitaGrow BioOrganics Manufacturing Facility"
+                    fill
+                    className="object-cover"
+                  />
                 </div>
                 <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-brand-gold/10 rounded-2xl -z-10" />
               </div>
@@ -202,36 +198,40 @@ export default function HomePage() {
         <section className="py-20 bg-brand-section">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
-              {/* Map placeholder */}
-              <div className="bg-white rounded-2xl shadow-sm border border-brand-border p-8 flex flex-col items-center justify-center h-80 lg:h-96">
-                <MapPin className="w-16 h-16 text-brand-primary/30 mb-4" />
-                <h3 className="font-heading text-lg font-semibold text-brand-dark mb-2">
-                  Pan-India Presence
-                </h3>
-                <p className="text-sm text-brand-body text-center max-w-xs">
-                  Serving farmers and dealers across multiple states through a
-                  growing distribution network.
-                </p>
-                <div className="flex flex-wrap gap-2 mt-4 justify-center">
-                  {[
-                    "Gujarat",
-                    "Maharashtra",
-                    "Rajasthan",
-                    "MP",
-                    "UP",
-                    "Punjab",
-                    "West Bengal",
-                    "AP",
-                    "Karnataka",
-                    "Tamil Nadu",
-                  ].map((state) => (
-                    <span
-                      key={state}
-                      className="text-xs bg-brand-light text-brand-primary px-2 py-1 rounded-full font-medium"
-                    >
-                      {state}
-                    </span>
-                  ))}
+              {/* Map image */}
+              <div className="relative rounded-2xl bg-brand-light h-80 lg:h-96 overflow-hidden">
+                <Image
+                  src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=800&q=80"
+                  alt="Pan-India Presence"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center p-8">
+                  <MapPin className="w-12 h-12 text-white mb-4" />
+                  <h3 className="font-heading text-xl font-bold text-white mb-2 text-center">
+                    Pan-India Presence
+                  </h3>
+                  <div className="flex flex-wrap gap-2 mt-4 justify-center">
+                    {[
+                      "Gujarat",
+                      "Maharashtra",
+                      "Rajasthan",
+                      "MP",
+                      "UP",
+                      "Punjab",
+                      "West Bengal",
+                      "AP",
+                      "Karnataka",
+                      "Tamil Nadu",
+                    ].map((state) => (
+                      <span
+                        key={state}
+                        className="text-xs bg-white/20 backdrop-blur-sm text-white px-3 py-1.5 rounded-full font-medium border border-white/30"
+                      >
+                        {state}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
 

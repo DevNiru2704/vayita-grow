@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle, Download, MessageCircle, Package, Leaf } from "lucide-react";
@@ -46,18 +47,13 @@ export default async function ProductDetailPage({
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12">
               {/* Image */}
-              <div className="rounded-2xl bg-gradient-to-br from-brand-light to-brand-section h-80 lg:h-[480px] flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-24 h-24 rounded-full bg-brand-primary/10 flex items-center justify-center mx-auto mb-4">
-                    <Leaf className="w-12 h-12 text-brand-primary" />
-                  </div>
-                  <p className="text-sm font-medium text-brand-primary">
-                    {product.name}
-                  </p>
-                  <p className="text-xs text-brand-body mt-1">
-                    Product Image
-                  </p>
-                </div>
+              <div className="relative rounded-2xl bg-brand-light h-80 lg:h-[480px] overflow-hidden">
+                <Image
+                  src="https://images.unsplash.com/photo-1504275490777-45f30792f13f?auto=format&fit=crop&w=800&q=80"
+                  alt={product.name}
+                  fill
+                  className="object-cover"
+                />
               </div>
 
               {/* Info */}
