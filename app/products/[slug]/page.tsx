@@ -47,15 +47,19 @@ export default async function ProductDetailPage({
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12">
               {/* Image */}
-              <div className="relative rounded-2xl bg-brand-light h-80 lg:h-[480px] overflow-hidden">
+              <div className="relative mx-auto w-full max-w-[420px] aspect-[2/3] rounded-2xl overflow-hidden border border-brand-border shadow-sm">
                 <Image
-                  src="https://images.unsplash.com/photo-1504275490777-45f30792f13f?auto=format&fit=crop&w=800&q=80"
-                  alt={product.name}
+                  src={product.image}
+                  alt={`${product.name} - ${product.category}`}
                   fill
-                  className="object-cover"
+                  className="object-cover transition-transform duration-500 hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, 420px"
+                  quality={100}
+                  priority
                 />
               </div>
 
+              {/* Info */}
               {/* Info */}
               <div>
                 <span className="inline-block text-xs font-medium text-brand-secondary bg-brand-light px-3 py-1 rounded-full mb-4">
@@ -115,22 +119,22 @@ export default async function ProductDetailPage({
               </div>
             </div>
 
-            {/* Application Details */}
+            {/* Dosage and Composition Details */}
             <div className="grid md:grid-cols-2 gap-8 mt-16">
               <div className="bg-brand-section rounded-2xl p-6 border border-brand-border">
                 <h3 className="font-heading text-lg font-semibold text-brand-dark mb-3">
-                  Application Method
+                  Dosage
                 </h3>
                 <p className="text-sm text-brand-body leading-relaxed">
-                  {product.applicationMethod}
+                  {product.Dosage}
                 </p>
               </div>
               <div className="bg-brand-section rounded-2xl p-6 border border-brand-border">
                 <h3 className="font-heading text-lg font-semibold text-brand-dark mb-3">
-                  Recommended Usage
+                  Composition
                 </h3>
                 <p className="text-sm text-brand-body leading-relaxed">
-                  {product.recommendedUsage}
+                  {product.Composition}
                 </p>
               </div>
             </div>

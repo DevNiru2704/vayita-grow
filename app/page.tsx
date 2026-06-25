@@ -1,6 +1,24 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Leaf, Sprout, TrendingUp, Droplets, Mountain, ShieldCheck, Factory, FlaskConical, Users, Truck, MapPin } from "lucide-react";
+import {
+  ArrowRight,
+  Leaf,
+  Sprout,
+  Mountain,
+  Factory,
+  FlaskConical,
+  Users,
+  Truck,
+  MapPin,
+  // New icons for the official catalog
+  Flower2,
+  Wheat,
+  Scale,
+  Activity,
+  Maximize,
+  Waves,
+  HelpCircle // Fallback icon
+} from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SectionHeading from "@/components/shared/SectionHeading";
@@ -9,22 +27,27 @@ import TestimonialCard from "@/components/shared/TestimonialCard";
 import { Button } from "@/components/ui/button";
 import { companyStats, productCategories, whyChooseUs, testimonials } from "@/lib/data";
 
+// Updated to match your exact Vayitagrow catalog data
 const categoryIconMap: Record<string, React.ElementType> = {
   Leaf,
+  FlaskConical,
   Sprout,
-  TrendingUp,
-  Droplets,
+  Flower2,
+  Wheat,
+  Scale,
   Mountain,
-  ShieldCheck,
+  Activity,
+  Maximize,
+  Waves,
 };
 
+// Kept exactly as you had it for the "Why Choose Us" section
 const whyIconMap: Record<string, React.ElementType> = {
   Factory,
   FlaskConical,
   Users,
   Truck,
 };
-
 export default function HomePage() {
   return (
     <>

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ImageOff } from "lucide-react";
 import { Product } from "@/lib/data";
 
 interface ProductCardProps {
@@ -8,16 +8,28 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  // Check if a valid image cutout exists and is not an empty string
+  const hasValidImage = product.imagecut && product.imagecut.trim() !== "";
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-brand-border overflow-hidden group hover:shadow-md transition-shadow">
-      <div className="relative h-48 bg-brand-light flex items-center justify-center overflow-hidden">
-        <Image
-          src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80"
-          alt={product.name}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-300"
-        />
-        <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-300" />
+
+      {/* Transparent Image Container */}
+      <div className="relative h-56 bg-brand-light border-b border-brand-border overflow-hidden">
+        {hasValidImage ? (
+          <Image
+            src={product.imagecut}
+            alt={`${product.name} packaging`}
+            fill
+            className="object-contain p-2 group-hover:scale-110 transition-transform duration-500"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-brand-body opacity-40">
+            <ImageOff className="w-10 h-10 stroke-[1.5]" />
+            <span className="text-xs font-medium">Image Not Available</span>
+          </div>
+        )}
       </div>
 
       {/* Content */}

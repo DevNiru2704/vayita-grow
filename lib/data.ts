@@ -13,55 +13,83 @@ export const companyStats = [
 // ---------- PRODUCT CATEGORIES ----------
 export type ProductCategory =
   | "All"
-  | "Bio Fertilizers"
-  | "Organic Fertilizers"
-  | "Growth Promoters"
-  | "Micronutrients"
-  | "Soil Conditioners"
-  | "Crop Protection";
+  | "Natural Plant Growth Promoter"
+  | "Amino Acid Enriched Liquid Nutrient"
+  | "Leaf Growth Promoter"
+  | "Flowering Promoter"
+  | "100% Organic Fertilizer"
+  | "Soil pH Regulator"
+  | "Seaweed-Based Enriched Mixed Granules"
+  | "Organic Enzyme"
+  | "Silicone-Based Spreader & Activator"
+  | "Soil Conditioner Powder";
 
 export const productCategories: {
   name: ProductCategory;
   description: string;
   icon: string;
 }[] = [
-  {
-    name: "Bio Fertilizers",
-    description:
-      "Microbial-based fertilizers that enhance soil fertility through natural nitrogen fixation and phosphate solubilization.",
-    icon: "Leaf",
-  },
-  {
-    name: "Organic Fertilizers",
-    description:
-      "Naturally derived nutrient formulations that improve soil structure, water retention, and long-term crop productivity.",
-    icon: "Sprout",
-  },
-  {
-    name: "Growth Promoters",
-    description:
-      "Plant growth regulators and bio-stimulants that boost root development, flowering, and overall plant vigour.",
-    icon: "TrendingUp",
-  },
-  {
-    name: "Micronutrients",
-    description:
-      "Essential trace element formulations that prevent nutrient deficiencies and support balanced crop nutrition.",
-    icon: "Droplets",
-  },
-  {
-    name: "Soil Conditioners",
-    description:
-      "Advanced soil amendment solutions that restore soil health, improve aeration, and maintain optimal pH balance.",
-    icon: "Mountain",
-  },
-  {
-    name: "Crop Protection",
-    description:
-      "Bio-based crop protection solutions that safeguard crops from pests and diseases while maintaining ecological balance.",
-    icon: "ShieldCheck",
-  },
-];
+    {
+      name: "Natural Plant Growth Promoter",
+      description:
+        "Formulated with humic and fulvic acids to improve overall plant health, stress tolerance, and vigorous crop development.",
+      icon: "Leaf",
+    },
+    {
+      name: "Amino Acid Enriched Liquid Nutrient",
+      description:
+        "A balanced liquid formulation that prevents nutrient deficiencies, improves flowering, and enhances fruit quality and yield.",
+      icon: "FlaskConical",
+    },
+    {
+      name: "Leaf Growth Promoter",
+      description:
+        "Scientifically developed to increase chlorophyll content, accelerate photosynthesis, and promote vigorous foliage expansion.",
+      icon: "Sprout",
+    },
+    {
+      name: "Flowering Promoter",
+      description:
+        "A highly effective stimulant that activates physiological processes to promote rapid, uniform flowering and reduce bud drop.",
+      icon: "Flower2",
+    },
+    {
+      name: "100% Organic Fertilizer",
+      description:
+        "Prepared from natural materials to restore beneficial microorganisms, improve soil fertility, and provide balanced long-term nutrition.",
+      icon: "Wheat",
+    },
+    {
+      name: "Soil pH Regulator",
+      description:
+        "Corrects acidic or alkaline soil imbalances to maintain optimal pH and significantly improve nutrient availability for roots.",
+      icon: "Scale",
+    },
+    {
+      name: "Soil Conditioner Powder",
+      description:
+        "Humic acid-based powder that enhances soil structure, improves water-holding capacity, and increases organic carbon.",
+      icon: "Mountain",
+    },
+    {
+      name: "Organic Enzyme",
+      description:
+        "An organic soil activator that accelerates matter decomposition and increases beneficial biological activity in the soil.",
+      icon: "Activity",
+    },
+    {
+      name: "Silicone-Based Spreader & Activator",
+      description:
+        "A premium agricultural adjuvant that drastically improves the spreading, sticking, and absorption of foliar sprays.",
+      icon: "Maximize",
+    },
+    {
+      name: "Seaweed-Based Enriched Mixed Granules",
+      description:
+        "Granular fertilizer rich in natural seaweed extracts and essential minerals to improve soil health and stimulate growth.",
+      icon: "Waves",
+    },
+  ];
 
 // ---------- PRODUCTS ----------
 export interface Product {
@@ -72,289 +100,254 @@ export interface Product {
   description: string;
   shortDescription: string;
   benefits: string[];
-  applicationMethod: string;
-  recommendedUsage: string;
+  Dosage: string;
+  Composition: string;
   packSizes: string[];
+  imagecut: string;
   image: string;
 }
 
 export const products: Product[] = [
   {
     id: "1",
-    slug: "vitagrow-bio-boost",
-    name: "VitaGrow Bio Boost",
-    category: "Bio Fertilizers",
+    slug: "VEER-L",
+    name: "VEER-L",
+    category: "Natural Plant Growth Promoter",
     description:
-      "VitaGrow Bio Boost is a premium microbial consortium fertilizer that contains beneficial bacteria and fungi to enhance soil fertility naturally. It promotes nitrogen fixation, phosphate solubilization, and potash mobilization, leading to improved nutrient availability for crops. Ideal for all types of agricultural and horticultural crops.",
+      "Veer-L is a natural plant growth promoter formulated with humic acid, fulvic acid, and essential nutrients. Its synergistic action improves plant growth, overall plant health, and stress tolerance. It enhances nutrient availability and supports vigorous crop development, resulting in increased yield and better crop performance.",
     shortDescription:
-      "Premium microbial consortium fertilizer for enhanced soil fertility and nutrient availability.",
+      "Enhances growth, strengthens plants, improves nutrient uptake, boosts yield, and resilience.",
     benefits: [
-      "Enhances nitrogen fixation in soil",
-      "Improves phosphorus availability to plants",
-      "Stimulates root growth and development",
-      "Reduces dependency on chemical fertilizers",
-      "Safe for soil micro-ecosystem",
+      "Promotes vigorous plant growth",
+      "Enhances nutrient absorption efficiency",
+      "Improves stress tolerance naturally",
+      "Supports healthier crop development",
+      "Increases yield and productivity"
     ],
-    applicationMethod:
-      "Mix 2-3 kg per acre with farm yard manure or compost and apply near the root zone. Can also be used as seed treatment at 10g per kg of seed.",
-    recommendedUsage:
-      "Apply during land preparation or within 15 days of sowing. Suitable for all field crops, vegetables, fruits, and plantation crops.",
-    packSizes: ["500g", "1 kg", "5 kg", "25 kg"],
-    image: "/products/bio-boost.jpg",
+    Dosage:
+      "All crops: 2–3 ml per liter of water",
+    Composition:
+      "Humic Acid, Fulvic Acid: 25.05%",
+    packSizes: ["100 ml", "250 ml", "500 ml", "1 Ltr"],
+    imagecut: "/products/VEER-L_rbg.png",
+    image: "/products/VEER-L.jpg",
   },
   {
     id: "2",
-    slug: "vitagrow-rootmax",
-    name: "VitaGrow RootMax",
-    category: "Bio Fertilizers",
+    slug: "VITA-A",
+    name: "VITA-A",
+    category: "Amino Acid Enriched Liquid Nutrient",
     description:
-      "VitaGrow RootMax is a specialized root development bio-fertilizer enriched with Mycorrhizal fungi and Trichoderma viride. It forms a symbiotic relationship with plant roots, expanding the root surface area for better water and nutrient absorption. Particularly effective in transplanted crops.",
+      "Vita-A is a balanced liquid nutrient enriched with amino acids and micronutrients. It helps prevent and correct nutrient deficiencies while promoting healthy growth. The formulation improves flowering, fruit setting, fruit size, color, and taste, resulting in higher-quality produce and increased productivity.",
     shortDescription:
-      "Mycorrhizal root development bio-fertilizer for superior nutrient uptake.",
+      "Enhances growth, corrects deficiencies, improves flowering, fruit quality, yield, and taste.",
     benefits: [
-      "Expands root surface area by up to 40%",
-      "Enhances water absorption efficiency",
-      "Improves transplant survival rate",
-      "Strengthens plant resistance to root diseases",
-      "Promotes early establishment of seedlings",
+      "Corrects nutrient deficiencies effectively",
+      "Promotes healthy plant growth",
+      "Enhances flowering and fruiting",
+      "Improves fruit size and color",
+      "Boosts yield and produce quality"
     ],
-    applicationMethod:
-      "Apply 1-2 kg per acre through drip irrigation or soil drenching near the root zone at the time of transplanting.",
-    recommendedUsage:
-      "Best suited for transplanted crops including tomato, chilli, brinjal, capsicum, and flower crops.",
-    packSizes: ["250g", "500g", "1 kg", "5 kg"],
-    image: "/products/rootmax.jpg",
+    Dosage:
+      "All crops: 2–3 ml per liter of water",
+    Composition:
+      "N/A",
+    packSizes: ["100 ml", "250 ml", "500 ml", "1 Ltr"],
+    imagecut: "/products/VITA-A_rbg.png",
+    image: "/products/VITA-A.jpg",
   },
   {
     id: "3",
-    slug: "vitagrow-soilcare",
-    name: "VitaGrow SoilCare",
-    category: "Soil Conditioners",
+    slug: "V-LEAF",
+    name: "V-LEAF",
+    category: "Leaf Growth Promoter",
     description:
-      "VitaGrow SoilCare is an advanced soil conditioning formulation that restores degraded soils. It contains humic acid, fulvic acid, and beneficial microorganisms that improve soil structure, water holding capacity, and cation exchange capacity. Essential for intensive farming areas.",
+      "V-Leaf is a scientifically developed leaf growth enhancer that promotes the formation of healthy and vigorous foliage. It improves cell division, nutrient absorption, and photosynthesis, leading to faster leaf expansion, increased chlorophyll content, and stronger plant growth. Healthy foliage contributes directly to improved crop productivity.",
     shortDescription:
-      "Advanced soil conditioner with humic and fulvic acids for soil restoration.",
+      "Enhances leaf growth, improves photosynthesis, and promotes vigorous, healthy foliage for better productivity.",
     benefits: [
-      "Improves soil organic carbon content",
-      "Enhances water holding capacity of sandy soils",
-      "Improves drainage in clayey soils",
-      "Increases cation exchange capacity",
-      "Restores soil microbial diversity",
+      "Promotes vigorous leaf expansion",
+      "Improves photosynthesis naturally",
+      "Enhances nutrient absorption",
+      "Increases chlorophyll content",
+      "Boosts overall crop productivity"
     ],
-    applicationMethod:
-      "Broadcast 5-10 kg per acre and incorporate into soil during land preparation. Can also be applied through drip irrigation at 2 kg per acre.",
-    recommendedUsage:
-      "Recommended for all soil types, especially degraded and intensive farming soils. Apply every season for best results.",
-    packSizes: ["1 kg", "5 kg", "10 kg", "25 kg"],
-    image: "/products/soilcare.jpg",
+    Dosage:
+      "All crops: 2–3 ml per liter of water",
+    Composition:
+      "N/A",
+    packSizes: ["100 ml", "250 ml", "500 ml", "1 Ltr"],
+    imagecut: "/products/V-LEAF_rbg.png",
+    image: "/products/V-LEAF.jpg",
   },
   {
     id: "4",
-    slug: "vitagrow-greenlife",
-    name: "VitaGrow GreenLife",
-    category: "Organic Fertilizers",
+    slug: "V-BOOST",
+    name: "V-BOOST",
+    category: "Flowering Promoter",
     description:
-      "VitaGrow GreenLife is a complete organic nutrition package derived from neem cake, castor cake, and bone meal. Enriched with essential macro and micronutrients, it provides sustained release nutrition throughout the crop cycle while improving soil health organically.",
+      "V-Boost is a highly effective flowering stimulant developed to promote rapid and uniform flowering. It activates the plant's natural physiological processes, resulting in improved bud formation, reduced flower drop, and healthier flowering. This helps maintain stronger flowers and better fruit-setting potential.",
     shortDescription:
-      "Complete organic nutrition package with sustained-release formula for all crops.",
+      "Stimulates rapid flowering, reduces flower drop, and improves fruit-setting potential.",
     benefits: [
-      "Provides complete NPK nutrition organically",
-      "Sustained nutrient release over 45-60 days",
-      "Improves soil texture and fertility",
-      "Natural pest repellent properties from neem",
-      "Safe for organic farming certification",
+      "Promotes rapid and uniform flowering",
+      "Reduces unwanted flower drop",
+      "Improves healthy bud formation",
+      "Enhances fruit-setting potential",
+      "Activates natural physiological processes"
     ],
-    applicationMethod:
-      "Apply 50-100 kg per acre as basal dose during land preparation. For standing crops, apply 25 kg per acre as top dressing near the plant base.",
-    recommendedUsage:
-      "Suitable for all crops including cereals, pulses, oilseeds, vegetables, fruits, and plantation crops.",
-    packSizes: ["5 kg", "10 kg", "25 kg", "50 kg"],
-    image: "/products/greenlife.jpg",
+    Dosage:
+      "10–15 drops per 15 liters of water",
+    Composition:
+      "Natural phytohormones and other beneficial ingredients",
+    packSizes: ["10 ml", "50 ml", "100 ml"],
+    imagecut: "/products/V-BOOST_rbg.png",
+    image: "/products/V-BOOST.jpg",
   },
   {
     id: "5",
-    slug: "vitagrow-cropshield",
-    name: "VitaGrow CropShield",
-    category: "Crop Protection",
+    slug: "JAIVIK-GOLD",
+    name: "JAIVIK GOLD",
+    category: "100% Organic Fertilizer",
     description:
-      "VitaGrow CropShield is a bio-based crop protection solution formulated with Pseudomonas fluorescens and Bacillus subtilis. It provides broad-spectrum protection against fungal and bacterial diseases while being completely safe for beneficial insects and the environment.",
+      "Jaivik Gold is a 100% natural organic fertilizer prepared from well-decomposed organic materials. It improves soil fertility, restores beneficial microorganisms, and provides long-lasting balanced nutrition. Suitable for field crops, horticulture, gardens, nurseries, and organic farming systems.",
     shortDescription:
-      "Bio-based broad-spectrum crop protection against fungal and bacterial diseases.",
+      "100% natural organic fertilizer that improves soil fertility and provides long-lasting balanced nutrition.",
     benefits: [
-      "Controls major fungal diseases like blight and wilt",
-      "Prevents bacterial leaf spot and canker",
-      "Safe for pollinators and beneficial insects",
-      "No pre-harvest interval restrictions",
-      "Compatible with organic farming practices",
+      "Improves overall soil fertility",
+      "Restores beneficial microorganisms",
+      "Provides long-lasting balanced nutrition",
+      "100% natural and organic composition",
+      "Suitable for all farming systems"
     ],
-    applicationMethod:
-      "Foliar spray at 3-5 ml per litre of water. Apply in the morning or evening for best results. Repeat every 10-15 days during disease-prone periods.",
-    recommendedUsage:
-      "Suitable for all crops. Start preventive application from 30 days after sowing or at the first sign of disease symptoms.",
-    packSizes: ["250 ml", "500 ml", "1 litre", "5 litres"],
-    image: "/products/cropshield.jpg",
+    Dosage:
+      "200–300 kg per acre",
+    Composition:
+      "N/A",
+    packSizes: ["50 kg", "1 kg"],
+    imagecut: "/products/JAIVIK-GOLD_rbg.png",
+    image: "/products/JAIVIK-gold.jpg",
   },
   {
     id: "6",
-    slug: "vitagrow-nutri-zinc",
-    name: "VitaGrow Nutri Zinc",
-    category: "Micronutrients",
+    slug: "VEER-P",
+    name: "VEER-P",
+    category: "Soil Conditioner Powder",
     description:
-      "VitaGrow Nutri Zinc is a chelated zinc micronutrient formulation designed to prevent and correct zinc deficiency in crops. Zinc plays a crucial role in enzyme activation, protein synthesis, and auxin metabolism. Essential for rice, wheat, maize, and fruit crops.",
+      "Veer-P is a humic acid-based soil conditioner designed to improve soil structure and increase organic carbon content. It enhances nutrient retention, improves water-holding capacity, increases soil aeration, and promotes healthy root-zone development. Regular use supports overall soil health and crop productivity.",
     shortDescription:
-      "Chelated zinc micronutrient for correcting zinc deficiency and boosting yield.",
+      "Humic acid-based soil conditioner that enhances soil structure, nutrient retention, and root development.",
     benefits: [
-      "Corrects zinc deficiency symptoms within 7-10 days",
-      "Improves grain filling and seed quality",
-      "Enhances enzyme activity and photosynthesis",
-      "Increases resistance to environmental stress",
-      "Compatible with most pesticides and fungicides",
+      "Improves soil structure and aeration",
+      "Increases organic carbon content",
+      "Enhances water-holding capacity",
+      "Promotes healthy root-zone development",
+      "Supports long-term soil health"
     ],
-    applicationMethod:
-      "Foliar spray at 2-3 g per litre of water. For soil application, mix 5 kg per acre with sand and broadcast uniformly.",
-    recommendedUsage:
-      "Apply at tillering stage in cereals, flowering stage in pulses, and fruit development stage in horticultural crops.",
-    packSizes: ["100g", "250g", "500g", "1 kg"],
-    image: "/products/nutri-zinc.jpg",
+    Dosage:
+      "All crops: 1 kg per acre",
+    Composition:
+      "Humic Acid: 75%, Fulvic Acid: 8%, Potassium: 6%, Moisture: 10%",
+    packSizes: ["1 kg"],
+    imagecut: "/products/VEER-P_rbg.png",
+    image: "/products/VEER-P.jpg",
   },
   {
     id: "7",
-    slug: "vitagrow-bloom-plus",
-    name: "VitaGrow Bloom Plus",
-    category: "Growth Promoters",
+    slug: "V-PH",
+    name: "V-pH",
+    category: "Soil pH Regulator",
     description:
-      "VitaGrow Bloom Plus is a premium plant growth promoter enriched with seaweed extract, amino acids, and plant hormones. It enhances flowering, fruit setting, and overall crop yield. The formulation stimulates natural plant growth processes for healthier and more productive crops.",
+      "V-pH helps regulate soil pH and maintain proper soil balance. It assists in correcting acidic or alkaline soil conditions, improving nutrient availability and root efficiency. Continuous use supports healthy soil development and creates favorable conditions for higher crop yields.",
     shortDescription:
-      "Seaweed-based growth promoter for enhanced flowering and fruit setting.",
+      "Regulates soil pH, corrects acidic or alkaline imbalances, and improves nutrient availability.",
     benefits: [
-      "Increases flowering by 25-30%",
-      "Improves fruit setting and retention",
-      "Enhances crop quality and shelf life",
-      "Provides natural stress tolerance",
-      "Rich in natural cytokinins and auxins",
+      "Regulates and maintains proper soil pH",
+      "Corrects acidic and alkaline conditions",
+      "Improves vital nutrient availability",
+      "Enhances root system efficiency",
+      "Creates favorable conditions for high yields"
     ],
-    applicationMethod:
-      "Foliar spray at 2-3 ml per litre of water at pre-flowering and post-flowering stages. Can also be applied through drip at 1 litre per acre.",
-    recommendedUsage:
-      "Ideal for flowering and fruiting crops including tomato, chilli, brinjal, mango, citrus, pomegranate, and flower crops.",
-    packSizes: ["250 ml", "500 ml", "1 litre", "5 litres"],
-    image: "/products/bloom-plus.jpg",
+    Dosage:
+      "All crops: 3–5 kg per bigha",
+    Composition:
+      "N/A",
+    packSizes: ["1 kg", "5 kg"],
+    imagecut: "/products/V-PH_rbg.png",
+    image: "/products/V-PH.jpg",
   },
   {
     id: "8",
-    slug: "vitagrow-organic-gold",
-    name: "VitaGrow Organic Gold",
-    category: "Organic Fertilizers",
+    slug: "V-RICH",
+    name: "V-RICH",
+    category: "Seaweed-Based Enriched Mixed Granules",
     description:
-      "VitaGrow Organic Gold is a premium vermicompost-based organic fertilizer enriched with bio-active substances. Produced through controlled vermicomposting processes, it provides a rich source of humus, plant nutrients, and growth hormones in a readily available form.",
+      "V-Rich is a premium seaweed-based granular fertilizer prepared from naturally derived seaweed extracts. It contains valuable minerals, organic matter, calcium, magnesium, and humic substances that improve soil health, enhance nutrient uptake, and stimulate plant growth. Suitable for all types of crops.",
     shortDescription:
-      "Premium vermicompost-based organic fertilizer with bio-active enrichment.",
+      "Premium seaweed granules that improve soil health, stimulate growth, and enhance nutrient uptake.",
     benefits: [
-      "High humus content for long-term soil health",
-      "Contains natural plant growth hormones",
-      "Improves soil water-holding capacity",
-      "Provides slow-release nutrition",
-      "Enhances beneficial soil microbial population",
+      "Improves overall soil health",
+      "Enhances nutrient uptake efficiency",
+      "Stimulates vigorous plant growth",
+      "Rich in essential minerals and organic matter",
+      "Suitable for all types of crops"
     ],
-    applicationMethod:
-      "Apply 200-400 kg per acre as basal application. For potted plants, mix with soil at 1:3 ratio.",
-    recommendedUsage:
-      "Suitable for all agricultural, horticultural, and floriculture crops. Best for organic farming systems.",
-    packSizes: ["5 kg", "10 kg", "25 kg", "50 kg"],
-    image: "/products/organic-gold.jpg",
+    Dosage:
+      "All crops: 3–5 kg per acre",
+    Composition:
+      "N/A",
+    packSizes: ["1 kg"],
+    imagecut: "/products/V-RICH_rbg.png",
+    image: "/products/V-RICH.jpg",
   },
   {
     id: "9",
-    slug: "vitagrow-micro-mix",
-    name: "VitaGrow Micro Mix",
-    category: "Micronutrients",
+    slug: "JYME-VITA",
+    name: "JYME-VITA",
+    category: "Organic Enzyme",
     description:
-      "VitaGrow Micro Mix is a balanced micronutrient mixture containing zinc, iron, manganese, copper, boron, and molybdenum in chelated form. It prevents and corrects multiple micronutrient deficiencies in a single application, ensuring complete crop nutrition.",
+      "Jyme-Vita is an organic enzyme-based soil activator designed to increase biological activity in the soil. It contains naturally derived enzymes and nutrients that stimulate beneficial microorganisms, accelerate decomposition of organic matter, and improve nutrient utilization. It strengthens plants and promotes healthy growth and productivity.",
     shortDescription:
-      "Complete chelated micronutrient mixture for balanced crop nutrition.",
+      "Organic soil activator that stimulates microorganisms, accelerates decomposition, and improves nutrient utilization.",
     benefits: [
-      "Corrects multiple deficiencies in one application",
-      "EDTA chelated for superior absorption",
-      "Prevents hidden hunger in crops",
-      "Improves crop uniformity and quality",
-      "Cost-effective nutrition management",
+      "Increases soil biological activity",
+      "Stimulates beneficial microorganisms",
+      "Accelerates organic matter decomposition",
+      "Improves nutrient utilization efficiency",
+      "Strengthens plants for healthy growth"
     ],
-    applicationMethod:
-      "Foliar spray at 2-3 g per litre of water. Two applications recommended at 30 and 60 days after sowing.",
-    recommendedUsage:
-      "Recommended for all crops, especially on soils with known micronutrient deficiency. Essential for intensive cropping systems.",
-    packSizes: ["100g", "250g", "500g", "1 kg"],
-    image: "/products/micro-mix.jpg",
+    Dosage:
+      "All crops: 10–15 kg per acre",
+    Composition:
+      "N/A",
+    packSizes: ["10 kg"],
+    imagecut: "/products/JYME-VITA_rbg.png",
+    image: "/products/JYME-VITA.jpg",
   },
   {
     id: "10",
-    slug: "vitagrow-vigor-max",
-    name: "VitaGrow Vigor Max",
-    category: "Growth Promoters",
+    slug: "V-FIX",
+    name: "V-FIX",
+    category: "Silicone-Based Spreader & Activator",
     description:
-      "VitaGrow Vigor Max is an advanced bio-stimulant formulation containing humic acid, fulvic acid, amino acids, and vitamins. It enhances overall plant vigor, stress tolerance, and crop productivity. Particularly effective during critical growth stages.",
+      "V-Fix is a silicone-based non-ionic agricultural adjuvant used along with pesticides and foliar sprays. It improves the spreading, sticking, and absorption of insecticides, fungicides, herbicides, and nutrients on plant surfaces. This results in better spray coverage, enhanced effectiveness, and improved crop protection.",
     shortDescription:
-      "Advanced bio-stimulant for enhanced plant vigor and stress tolerance.",
+      "Silicone-based adjuvant that improves spreading, sticking, and absorption of foliar sprays.",
     benefits: [
-      "Boosts overall plant vigor and canopy development",
-      "Enhances tolerance to drought and heat stress",
-      "Improves nutrient use efficiency",
-      "Accelerates recovery after pest or weather damage",
-      "Compatible with all crop protection products",
+      "Improves spray spreading and sticking",
+      "Enhances absorption of foliar sprays",
+      "Increases effectiveness of pesticides",
+      "Provides better uniform spray coverage",
+      "Improves overall crop protection"
     ],
-    applicationMethod:
-      "Foliar spray at 2 ml per litre or drench at 500 ml per acre through drip irrigation.",
-    recommendedUsage:
-      "Apply at vegetative growth stage, pre-flowering, and during stress periods. Suitable for all field and horticultural crops.",
-    packSizes: ["250 ml", "500 ml", "1 litre", "5 litres"],
-    image: "/products/vigor-max.jpg",
-  },
-  {
-    id: "11",
-    slug: "vitagrow-neem-protect",
-    name: "VitaGrow Neem Protect",
-    category: "Crop Protection",
-    description:
-      "VitaGrow Neem Protect is a neem oil-based bio-pesticide with 3000 ppm azadirachtin content. It acts as an insect growth regulator, antifeedant, and repellent against a wide range of sucking and chewing pests. Ideal for integrated pest management programs.",
-    shortDescription:
-      "High-potency neem oil bio-pesticide for broad-spectrum pest management.",
-    benefits: [
-      "Controls over 200 species of crop pests",
-      "Acts as antifeedant, repellent, and growth regulator",
-      "No pest resistance development",
-      "Safe for natural enemies and pollinators",
-      "Zero residue on harvested produce",
-    ],
-    applicationMethod:
-      "Foliar spray at 2-5 ml per litre of water. Apply in the evening for best results. Repeat every 7-10 days during pest incidence.",
-    recommendedUsage:
-      "Suitable for all crops as preventive and curative pest management. Part of IPM-compatible solutions.",
-    packSizes: ["250 ml", "500 ml", "1 litre", "5 litres"],
-    image: "/products/neem-protect.jpg",
-  },
-  {
-    id: "12",
-    slug: "vitagrow-humic-power",
-    name: "VitaGrow Humic Power",
-    category: "Soil Conditioners",
-    description:
-      "VitaGrow Humic Power is a concentrated humic acid formulation derived from leonardite. With 80% humic acid content, it dramatically improves soil structure, nutrient retention, and root development. An essential input for building long-term soil fertility.",
-    shortDescription:
-      "Concentrated humic acid formulation for superior soil health and fertility.",
-    benefits: [
-      "80% humic acid for maximum effectiveness",
-      "Dramatically improves nutrient retention",
-      "Enhances root mass development",
-      "Buffers soil pH for optimal nutrient availability",
-      "Reduces nutrient leaching losses",
-    ],
-    applicationMethod:
-      "Soil application at 2-5 kg per acre mixed with irrigation water. For foliar use, apply at 1-2 ml per litre.",
-    recommendedUsage:
-      "Apply at land preparation and repeat at 30-day intervals. Essential for sandy soils and areas with low organic matter.",
-    packSizes: ["500g", "1 kg", "5 kg", "25 kg"],
-    image: "/products/humic-power.jpg",
-  },
+    Dosage:
+      "All crops: 5 ml per liter of water",
+    Composition:
+      "N/A",
+    packSizes: ["100 ml", "250 ml", "500 ml", "1 Ltr"],
+    imagecut: "/products/V-FIX_rbg.png",
+    image: "/products/V-FIX.jpg",
+  }
 ];
 
 // ---------- WHY CHOOSE US ----------

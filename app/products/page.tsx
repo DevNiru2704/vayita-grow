@@ -8,14 +8,19 @@ import SectionHeading from "@/components/shared/SectionHeading";
 import ProductCard from "@/components/shared/ProductCard";
 import { products } from "@/lib/data";
 
+// Updated to match the exact categories from the official catalog
 const filterCategories: ProductCategory[] = [
   "All",
-  "Bio Fertilizers",
-  "Organic Fertilizers",
-  "Growth Promoters",
-  "Micronutrients",
-  "Soil Conditioners",
-  "Crop Protection",
+  "Natural Plant Growth Promoter",
+  "Amino Acid Enriched Liquid Nutrient",
+  "Leaf Growth Promoter",
+  "Flowering Promoter",
+  "100% Organic Fertilizer",
+  "Soil Conditioner Powder",
+  "Soil pH Regulator",
+  "Seaweed-Based Enriched Mixed Granules",
+  "Organic Enzyme",
+  "Silicone-Based Spreader & Activator",
 ];
 
 export default function ProductsPage() {
@@ -57,11 +62,10 @@ export default function ProductsPage() {
                 <button
                   key={cat}
                   onClick={() => setActiveFilter(cat)}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                    activeFilter === cat
-                      ? "bg-brand-primary text-white shadow-sm"
-                      : "bg-white text-brand-body border border-brand-border hover:border-brand-primary/30 hover:text-brand-primary"
-                  }`}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeFilter === cat
+                    ? "bg-brand-primary text-white shadow-sm"
+                    : "bg-white text-brand-body border border-brand-border hover:border-brand-primary/30 hover:text-brand-primary"
+                    }`}
                 >
                   {cat}
                 </button>
@@ -75,6 +79,7 @@ export default function ProductsPage() {
               ))}
             </div>
 
+            {/* Empty State Fallback */}
             {filtered.length === 0 && (
               <div className="text-center py-16">
                 <p className="text-brand-body">
