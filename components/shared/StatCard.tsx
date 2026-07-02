@@ -1,78 +1,75 @@
-import {
-  Users,
-  ShoppingCart,
-  FileText,
-  ClipboardList,
-  TrendingUp,
-  Package,
-  MapPin,
-  Sprout,
-  type LucideIcon,
-} from "lucide-react";
+import { cva, type VariantProps } from "class-variance-authority";
+import type { LucideIcon } from "lucide-react";
+import { AnimatedNumber } from "@/components/shared/AnimatedNumber";
+import { cn } from "@/lib/utils";
 
-const iconMap: Record<string, LucideIcon> = {
-  Users,
-  ShoppingCart,
-  FileText,
-  ClipboardList,
-  TrendingUp,
-  Package,
-  MapPin,
-  Sprout,
-};
+/**
+ * Single stat card implementation for the whole app (home facts, login
+ * panel, dashboard overview) - variants via CVA, never reimplemented inline.
+ */
 
-interface StatCardProps {
-  label: string;
-  value: string | number;
-  icon?: string;
-  change?: string;
-  description?: string;
-  variant?: "default" | "hero";
-}
+const statCardVariants = cva("rounded-xl border bg-card p-5", {
+  variants: {
+    variant: {
+      default: "",
+      hero: "text-center",
+    },
+  },
+  defaultVariants: { variant: "default" },
+});
 
-export default function StatCard({
+export function StatCard({
   label,
   value,
-  icon,
-  change,
-  description,
-  variant = "default",
-}: StatCardProps) {
-  const Icon = icon ? iconMap[icon] : null;
+  suffix = "",
+  hint,
+  icon: Icon,
+  animate = false,
+  variant,
+  className,
+}: {
+  label: string;
+  value: number | string;
+  /** Rendered after the number, e.g. "+" for open-ended counts. */
+  suffix?: string;
+  hint?: string;
+  icon?: LucideIcon;
+  /** Count-up on first view (falls back to static for reduced motion). */
+  animate?: boolean;
+  className?: string;
+} & VariantProps<typeof statCardVariants>) {
+  const valueNode =
+    animate && typeof value === "number" ? (
+      <AnimatedNumber value={value} suffix={suffix} />
+    ) : (
+      <>
+        {value}
+        {suffix}
+      </>
+    );
 
   if (variant === "hero") {
     return (
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-brand-border text-center hover:shadow-md transition-shadow">
-        <p className="font-heading text-3xl sm:text-4xl font-bold text-brand-primary mb-1">
-          {value}
-        </p>
-        <p className="text-sm font-medium text-brand-body">{label}</p>
+      <div className={cn(statCardVariants({ variant }), className)}>
+        <p className="font-display text-3xl text-brand-600 sm:text-4xl">{valueNode}</p>
+        <p className="mt-1 text-sm font-medium text-muted-foreground">{label}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm border border-brand-border hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm font-medium text-brand-body mb-1">{label}</p>
-          <p className="font-heading text-2xl font-bold text-brand-dark">
-            {value}
-          </p>
-          {change && (
-            <p className="text-xs text-brand-secondary mt-1 font-medium">
-              {change} from last month
-            </p>
-          )}
-          {description && (
-            <p className="text-xs text-brand-body mt-1">{description}</p>
-          )}
+    <div className={cn(statCardVariants({ variant }), className)}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-muted-foreground">{label}</p>
+          <p className="font-sans text-2xl font-semibold tracking-tight">{valueNode}</p>
+          {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
         </div>
-        {Icon && (
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-brand-light text-brand-primary">
-            <Icon className="w-5 h-5" />
+        {Icon ? (
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-brand-100 text-brand-600">
+            <Icon aria-hidden className="size-5" />
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
