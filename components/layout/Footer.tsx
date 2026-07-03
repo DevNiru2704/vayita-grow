@@ -1,122 +1,93 @@
+import { Mail, MapPin, Phone } from "lucide-react";
 import Link from "next/link";
-import { Leaf, Phone, Mail, MapPin } from "lucide-react";
+import { BrandLogo } from "@/components/shared/BrandLogo";
+import { company } from "@/lib/config/company";
+import { publicNav } from "@/lib/config/navigation";
 
-export default function Footer() {
+/** Site footer - all facts and links come from lib/config (single source). */
+export function Footer() {
+  const year = new Date().getFullYear();
+
   return (
-    <footer className="bg-brand-dark text-white">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-          {/* Company Info */}
+    <footer className="border-t bg-brand-950 text-brand-100">
+      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-brand-primary text-white">
-                <Leaf className="w-5 h-5" />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-heading text-base font-bold leading-tight">
-                  VayitaGrow
-                </span>
-                <span className="text-[10px] text-gray-400 leading-tight tracking-wider uppercase">
-                  BioOrganics
-                </span>
-              </div>
-            </Link>
-            <p className="text-sm text-gray-400 leading-relaxed">
-              Sustainable Agricultural Solutions for Modern Farming. Manufacturing
-              and marketing quality agricultural inputs for improved productivity.
+            <div className="flex items-center gap-2.5">
+              <BrandLogo height={40} inverted />
+              <p className="font-display text-lg font-semibold text-white">
+                {company.shortName} Bioorganics
+              </p>
+            </div>
+            <p className="max-w-xs text-sm leading-relaxed text-brand-200">
+              {company.supportingMessage}
             </p>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="font-heading font-semibold text-sm uppercase tracking-wider mb-4">
-              Quick Links
-            </h3>
+          <nav aria-label="Footer" className="space-y-4">
+            <p className="text-sm font-semibold tracking-wide text-white uppercase">Company</p>
             <ul className="space-y-2.5">
-              {[
-                { label: "Home", href: "/" },
-                { label: "About Us", href: "/about" },
-                { label: "Products", href: "/products" },
-                { label: "Feedback", href: "/feedback" },
-                { label: "Contact", href: "/contact" },
-              ].map((link) => (
+              {publicNav.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-gray-400 hover:text-brand-secondary transition-colors"
+                    className="rounded-sm text-sm text-brand-200 hover:text-white focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
                   >
                     {link.label}
                   </Link>
                 </li>
               ))}
             </ul>
-          </div>
+          </nav>
 
-          {/* Products */}
-          <div>
-            <h3 className="font-heading font-semibold text-sm uppercase tracking-wider mb-4">
-              Products
-            </h3>
-            <ul className="space-y-2.5">
-              {[
-                "Bio Fertilizers",
-                "Organic Fertilizers",
-                "Growth Promoters",
-                "Micronutrients",
-                "Soil Conditioners",
-                "Crop Protection",
-              ].map((item) => (
-                <li key={item}>
-                  <Link
-                    href="/products"
-                    className="text-sm text-gray-400 hover:text-brand-secondary transition-colors"
-                  >
-                    {item}
-                  </Link>
+          <div className="space-y-4">
+            <p className="text-sm font-semibold tracking-wide text-white uppercase">
+              Where We Operate
+            </p>
+            <ul className="space-y-2.5 text-sm text-brand-200">
+              {company.operatingStates.map((state) => (
+                <li key={state} className="flex items-center gap-2">
+                  <MapPin aria-hidden className="size-4 shrink-0 text-brand-400" />
+                  {state}
                 </li>
               ))}
             </ul>
+            <p className="text-xs text-brand-300">Registered office: {company.registeredState}</p>
           </div>
 
-          {/* Contact */}
-          <div>
-            <h3 className="font-heading font-semibold text-sm uppercase tracking-wider mb-4">
-              Contact
-            </h3>
-            <ul className="space-y-3">
-              <li className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-brand-secondary mt-0.5 shrink-0" />
-                <span className="text-sm text-gray-400">
-                  Kolkata, West Bengal, India
-                </span>
+          <div className="space-y-4">
+            <p className="text-sm font-semibold tracking-wide text-white uppercase">Contact</p>
+            <ul className="space-y-2.5 text-sm text-brand-200">
+              <li className="flex items-start gap-2">
+                <MapPin aria-hidden className="mt-0.5 size-4 shrink-0 text-brand-400" />
+                <span>{company.contact.addressLines.join(", ")}</span>
               </li>
-              <li className="flex items-center gap-3">
-                <Phone className="w-4 h-4 text-brand-secondary shrink-0" />
-                <span className="text-sm text-gray-400">+91 9876543210</span>
+              <li className="flex items-center gap-2">
+                <Phone aria-hidden className="size-4 shrink-0 text-brand-400" />
+                <a
+                  href={`tel:${company.contact.landline.replaceAll(" ", "")}`}
+                  className="rounded-sm hover:text-white focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
+                >
+                  {company.contact.landline}
+                </a>
               </li>
-              <li className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-brand-secondary shrink-0" />
-                <span className="text-sm text-gray-400">info@vayitagrow.com</span>
+              <li className="flex items-center gap-2">
+                <Mail aria-hidden className="size-4 shrink-0 text-brand-400" />
+                <a
+                  href={`mailto:${company.contact.email}`}
+                  className="rounded-sm hover:text-white focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
+                >
+                  {company.contact.email}
+                </a>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="mt-12 pt-8 border-t border-gray-700">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="text-xs text-gray-500">
-              &copy; {new Date().getFullYear()} VayitaGrow BioOrganics Private Limited. All rights reserved.
-            </p>
-            <div className="flex items-center gap-6">
-              <Link href="#" className="text-xs text-gray-500 hover:text-gray-400 transition-colors">
-                Privacy Policy
-              </Link>
-              <Link href="#" className="text-xs text-gray-500 hover:text-gray-400 transition-colors">
-                Terms of Service
-              </Link>
-            </div>
-          </div>
+        <div className="mt-12 border-t border-white/10 pt-6">
+          <p className="text-xs text-brand-300">
+            © {year} {company.legalName}. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

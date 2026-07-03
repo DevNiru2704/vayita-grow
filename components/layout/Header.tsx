@@ -1,98 +1,121 @@
 "use client";
 
+import { LogIn, Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Menu, X, Leaf } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { navLinks } from "@/lib/data";
+import { BrandLogo } from "@/components/shared/BrandLogo";
+import { buttonVariants } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { company } from "@/lib/config/company";
+import { publicNav } from "@/lib/config/navigation";
+import { cn } from "@/lib/utils";
 
-export default function Header() {
+function Wordmark() {
+  return (
+    <Link
+      href="/"
+      className="flex items-center gap-2 rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+    >
+      <BrandLogo height={38} className="-my-1" />
+      <span className="font-display text-lg leading-none font-semibold tracking-tight">
+        {company.shortName}
+        <span className="block font-sans text-[0.65rem] font-medium tracking-wide text-muted-foreground uppercase">
+          Bioorganics
+        </span>
+      </span>
+    </Link>
+  );
+}
+
+export function Header() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
+
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-brand-border">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-brand-primary text-white transition-transform group-hover:scale-105">
-              <Leaf className="w-5 h-5" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-heading text-base font-bold text-brand-dark leading-tight">
-                VayitaGrow
-              </span>
-              <span className="text-[10px] text-brand-body leading-tight tracking-wider uppercase">
-                BioOrganics
-              </span>
-            </div>
+    <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur supports-backdrop-filter:bg-background/75">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <Wordmark />
+
+        <nav aria-label="Main" className="hidden items-center gap-1 lg:flex">
+          {publicNav.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              aria-current={isActive(link.href) ? "page" : undefined}
+              className={cn(
+                "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+                isActive(link.href)
+                  ? "bg-brand-100 text-brand-700"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
+              )}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-2">
+          <Link
+            href="/login"
+            className={cn(buttonVariants({ size: "lg" }), "hidden lg:inline-flex")}
+          >
+            <LogIn aria-hidden data-icon="inline-start" />
+            Portal Login
           </Link>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  pathname === link.href
-                    ? "text-brand-primary bg-brand-light"
-                    : "text-brand-body hover:text-brand-primary hover:bg-brand-light/50"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-
-          {/* Login Button */}
-          <div className="hidden md:flex items-center">
-            <Link href="/login">
-              <Button className="bg-brand-primary hover:bg-brand-secondary text-white rounded-xl px-6 h-9 text-sm font-medium">
-                Login
-              </Button>
-            </Link>
-          </div>
-
-          {/* Mobile Toggle */}
-          <button
-            className="md:hidden p-2 rounded-lg text-brand-body hover:bg-brand-light transition-colors"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle navigation menu"
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+            <SheetTrigger
+              className={cn(buttonVariants({ variant: "outline", size: "icon-lg" }), "lg:hidden")}
+              aria-label="Open menu"
+            >
+              <Menu aria-hidden className="size-5" />
+            </SheetTrigger>
+            <SheetContent side="right" className="w-72">
+              <SheetHeader>
+                <SheetTitle className="text-left">Menu</SheetTitle>
+              </SheetHeader>
+              <nav aria-label="Mobile" className="flex flex-col gap-1 px-4 pb-6">
+                {publicNav.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    aria-current={isActive(link.href) ? "page" : undefined}
+                    className={cn(
+                      "rounded-md px-3 py-2.5 text-sm font-medium",
+                      "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+                      isActive(link.href)
+                        ? "bg-brand-100 text-brand-700"
+                        : "text-foreground hover:bg-muted",
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+                <Link
+                  href="/login"
+                  onClick={() => setMobileOpen(false)}
+                  className={cn(buttonVariants({ size: "lg" }), "mt-3")}
+                >
+                  <LogIn aria-hidden data-icon="inline-start" />
+                  Portal Login
+                </Link>
+              </nav>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
-
-      {/* Mobile Nav */}
-      {mobileOpen && (
-        <div className="md:hidden border-t border-brand-border bg-white">
-          <nav className="flex flex-col px-4 py-3 gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  pathname === link.href
-                    ? "text-brand-primary bg-brand-light"
-                    : "text-brand-body hover:text-brand-primary hover:bg-brand-light/50"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-            <Link href="/login" onClick={() => setMobileOpen(false)}>
-              <Button className="w-full mt-2 bg-brand-primary hover:bg-brand-secondary text-white rounded-xl h-10 text-sm font-medium">
-                Login
-              </Button>
-            </Link>
-          </nav>
-        </div>
-      )}
     </header>
   );
 }
