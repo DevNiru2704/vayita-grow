@@ -1,167 +1,189 @@
-"use client";
-
 import {
-  Users,
-  ShoppingCart,
-  FileText,
+  ArrowRight,
   ClipboardList,
+  FileText,
+  PackageOpen,
+  ShoppingCart,
+  Users,
 } from "lucide-react";
+import Link from "next/link";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { StatCard } from "@/components/shared/StatCard";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { RevenueTrendChart } from "@/components/dashboard/charts/RevenueTrendChart";
+import { getSession } from "@/lib/auth/session";
+import { formatINR, formatNumber, formatDate } from "@/lib/format";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-} from "recharts";
-import { dashboardStats, monthlyOrdersData, monthlyReportsData } from "@/lib/data";
+  getDashboardStats,
+  getLowStockItems,
+  getMonthlyOrderSeries,
+} from "@/lib/services/dashboard";
+import { getRecentOrders } from "@/lib/services/dashboard";
+import { getOrderStats } from "@/lib/services/orders";
+import { ORDER_STATUSES } from "@/lib/types/database";
 
-const iconMap: Record<string, React.ElementType> = {
-  Users,
-  ShoppingCart,
-  FileText,
-  ClipboardList,
-};
+const STAT_ICONS = [Users, ShoppingCart, FileText, ClipboardList];
 
-export default function DashboardPage() {
+export default async function DashboardOverviewPage() {
+  const [session, stats, series, orderStats, recentOrders, lowStock] = await Promise.all([
+    getSession(),
+    getDashboardStats(),
+    getMonthlyOrderSeries(),
+    getOrderStats(),
+    getRecentOrders(6),
+    getLowStockItems(5),
+  ]);
+
+  const totalOrders = ORDER_STATUSES.reduce((sum, s) => sum + orderStats.byStatus[s], 0);
+
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="font-heading text-2xl font-bold text-brand-dark mb-1">
-          Dashboard Overview
-        </h1>
-        <p className="text-sm text-brand-body">
-          Welcome back. Here is a summary of your business operations.
-        </p>
+    <div className="space-y-6">
+      <PageHeader
+        title={`Welcome back, ${session?.username ?? "there"}`}
+        description="A live overview of clients, orders, catalog, and field operations."
+      />
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {stats.map((stat, index) => (
+          <StatCard
+            key={stat.label}
+            label={stat.label}
+            value={stat.value}
+            hint={stat.hint}
+            icon={STAT_ICONS[index]}
+          />
+        ))}
       </div>
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {dashboardStats.map((stat) => {
-          const Icon = iconMap[stat.icon];
-          return (
-            <div
-              key={stat.label}
-              className="bg-white rounded-2xl p-5 shadow-sm border border-brand-border hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-brand-body mb-1">
-                    {stat.label}
-                  </p>
-                  <p className="font-heading text-2xl font-bold text-brand-dark">
-                    {stat.value}
-                  </p>
-                  <p className="text-xs text-brand-secondary mt-1 font-medium">
-                    {stat.change} from last month
-                  </p>
-                </div>
-                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-brand-light text-brand-primary">
-                  {Icon && <Icon className="w-5 h-5" />}
-                </div>
-              </div>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <section
+          aria-labelledby="revenue-heading"
+          className="rounded-xl border bg-card p-5 lg:col-span-2"
+        >
+          <div className="mb-4 flex items-baseline justify-between gap-4">
+            <div>
+              <h2 id="revenue-heading" className="font-sans text-base font-semibold">
+                Order revenue - last 6 months
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Revenue this month: {formatINR(orderStats.revenueMTD)}
+              </p>
             </div>
-          );
-        })}
+          </div>
+          <RevenueTrendChart data={series} />
+        </section>
+
+        <section aria-labelledby="status-heading" className="rounded-xl border bg-card p-5">
+          <h2 id="status-heading" className="font-sans text-base font-semibold">
+            Orders by status
+          </h2>
+          <p className="mb-5 text-sm text-muted-foreground">
+            {formatNumber(totalOrders)} orders total
+          </p>
+          <ul className="space-y-4">
+            {ORDER_STATUSES.map((status) => {
+              const count = orderStats.byStatus[status];
+              const share = totalOrders === 0 ? 0 : Math.round((count / totalOrders) * 100);
+              return (
+                <li key={status}>
+                  <div className="mb-1.5 flex items-center justify-between gap-2">
+                    <StatusBadge status={status} />
+                    <span className="text-sm font-medium">{formatNumber(count)}</span>
+                  </div>
+                  <div
+                    role="img"
+                    aria-label={`${status}: ${count} orders (${share}%)`}
+                    className="h-1.5 overflow-hidden rounded-full bg-muted"
+                  >
+                    <div
+                      className="h-full rounded-full bg-brand-500"
+                      style={{ width: `${share}%` }}
+                    />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       </div>
 
-      {/* Charts */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Monthly Orders */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-brand-border">
-          <h3 className="font-heading text-base font-semibold text-brand-dark mb-1">
-            Monthly Orders
-          </h3>
-          <p className="text-xs text-brand-body mb-6">
-            Order count and revenue trends over the last 12 months
-          </p>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyOrdersData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
-                <XAxis
-                  dataKey="month"
-                  tick={{ fontSize: 12, fill: "#4B5563" }}
-                  axisLine={{ stroke: "#E5E7EB" }}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={{ fontSize: 12, fill: "#4B5563" }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: "12px",
-                    border: "1px solid #E5E7EB",
-                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                    fontSize: "13px",
-                  }}
-                />
-                <Bar
-                  dataKey="orders"
-                  fill="#14833B"
-                  radius={[6, 6, 0, 0]}
-                  name="Orders"
-                />
-                <Bar
-                  dataKey="revenue"
-                  fill="#D4A017"
-                  radius={[6, 6, 0, 0]}
-                  name="Revenue (L)"
-                />
-              </BarChart>
-            </ResponsiveContainer>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <section
+          aria-labelledby="recent-orders-heading"
+          className="rounded-xl border bg-card lg:col-span-2"
+        >
+          <div className="flex items-center justify-between gap-4 border-b p-5 pb-4">
+            <h2 id="recent-orders-heading" className="font-sans text-base font-semibold">
+              Recent orders
+            </h2>
+            <Link
+              href="/dashboard/orders"
+              className="inline-flex items-center gap-1 rounded-sm text-sm font-medium text-brand-600 hover:text-brand-700 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+            >
+              View all
+              <ArrowRight aria-hidden className="size-3.5" />
+            </Link>
           </div>
-        </div>
+          <ul className="divide-y">
+            {recentOrders.map((order) => (
+              <li key={order.orderId}>
+                <Link
+                  href={`/dashboard/orders/${order.orderId}`}
+                  className="flex items-center justify-between gap-4 px-5 py-3.5 transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset focus-visible:outline-none"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{order.customerName}</p>
+                    <p className="text-xs text-muted-foreground">
+                      #{order.orderId} · {formatDate(order.createdAt)} · {order.itemCount} item
+                      {order.itemCount === 1 ? "" : "s"}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-3">
+                    <span className="text-sm font-medium">{formatINR(order.totalAmount)}</span>
+                    <StatusBadge status={order.status} />
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
 
-        {/* Monthly Reports */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-brand-border">
-          <h3 className="font-heading text-base font-semibold text-brand-dark mb-1">
-            Monthly Field Reports
-          </h3>
-          <p className="text-xs text-brand-body mb-6">
-            Field visit reports submitted over the last 12 months
-          </p>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={monthlyReportsData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
-                <XAxis
-                  dataKey="month"
-                  tick={{ fontSize: 12, fill: "#4B5563" }}
-                  axisLine={{ stroke: "#E5E7EB" }}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={{ fontSize: 12, fill: "#4B5563" }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: "12px",
-                    border: "1px solid #E5E7EB",
-                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                    fontSize: "13px",
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="reports"
-                  stroke="#2A9D4B"
-                  strokeWidth={2.5}
-                  dot={{ r: 4, fill: "#2A9D4B" }}
-                  activeDot={{ r: 6 }}
-                  name="Reports"
-                />
-              </LineChart>
-            </ResponsiveContainer>
+        <section aria-labelledby="low-stock-heading" className="rounded-xl border bg-card">
+          <div className="flex items-center justify-between gap-4 border-b p-5 pb-4">
+            <h2 id="low-stock-heading" className="font-sans text-base font-semibold">
+              Low stock
+            </h2>
+            <Link
+              href="/dashboard/inventory?low=1"
+              className="inline-flex items-center gap-1 rounded-sm text-sm font-medium text-brand-600 hover:text-brand-700 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+            >
+              Inventory
+              <ArrowRight aria-hidden className="size-3.5" />
+            </Link>
           </div>
-        </div>
+          {lowStock.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 px-5 py-10 text-center">
+              <PackageOpen aria-hidden className="size-6 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">
+                All products are above the low-stock threshold.
+              </p>
+            </div>
+          ) : (
+            <ul className="divide-y">
+              {lowStock.map((item) => (
+                <li key={item.inventoryId} className="flex items-center justify-between gap-3 px-5 py-3.5">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{item.productName}</p>
+                    <p className="text-xs text-muted-foreground">{item.sku}</p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-status-warning-soft px-2.5 py-0.5 text-xs font-semibold text-status-warning">
+                    {formatNumber(item.quantity)} left
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </div>
     </div>
   );
