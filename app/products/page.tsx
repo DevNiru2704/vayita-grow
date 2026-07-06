@@ -8,8 +8,8 @@ import SectionHeading from "@/components/shared/SectionHeading";
 import ProductCard from "@/components/shared/ProductCard";
 import { products } from "@/lib/data";
 
-// Updated to match the exact categories from the official catalog
-const filterCategories: ProductCategory[] = [
+// Keep this as your master list so the buttons render in this exact order
+const masterCategories: ProductCategory[] = [
   "All",
   "Natural Plant Growth Promoter",
   "Amino Acid Enriched Liquid Nutrient",
@@ -25,6 +25,18 @@ const filterCategories: ProductCategory[] = [
 
 export default function ProductsPage() {
   const [activeFilter, setActiveFilter] = useState<ProductCategory>("All");
+
+  // 1. Tally up how many products belong to each category
+  const categoryCounts = products.reduce((acc, product) => {
+    acc[product.category] = (acc[product.category] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  // 2. Filter the master list. Keep "All", and only keep categories with 2 or more products.
+  // (If you truly meant 3 or more products, change `>= 2` to `>= 3`)
+  const visibleCategories = masterCategories.filter(
+    (cat) => cat === "All" || (categoryCounts[cat] && categoryCounts[cat] >= 2)
+  );
 
   const filtered =
     activeFilter === "All"
@@ -56,21 +68,23 @@ export default function ProductsPage() {
               subtitle="Browse our range of bio fertilizers, organic inputs, growth promoters, and more."
             />
 
-            {/* Filter Bar */}
-            <div className="flex flex-wrap justify-center gap-2 mb-12">
-              {filterCategories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveFilter(cat)}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeFilter === cat
-                    ? "bg-brand-primary text-white shadow-sm"
-                    : "bg-white text-brand-body border border-brand-border hover:border-brand-primary/30 hover:text-brand-primary"
-                    }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
+            {/* Filter Bar - ONLY renders if there is more than just the "All" button */}
+            {visibleCategories.length > 1 && (
+              <div className="flex flex-wrap justify-center gap-2 mb-12">
+                {visibleCategories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveFilter(cat)}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeFilter === cat
+                        ? "bg-brand-primary text-white shadow-sm"
+                        : "bg-white text-brand-body border border-brand-border hover:border-brand-primary/30 hover:text-brand-primary"
+                      }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Product Grid */}
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
