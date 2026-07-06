@@ -1,13 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-      },
-    ],
+  // All imagery is served from /public — no remote image hosts needed.
+  experimental: {
+    // Persist Turbopack's dev compilation cache to disk instead of holding
+    // every recompile generation in memory — keeps long `next dev` sessions
+    // (especially during heavy refactors) from ballooning the JS heap.
+    turbopackFileSystemCacheForDev: true,
   },
 };
 

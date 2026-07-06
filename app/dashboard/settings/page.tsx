@@ -1,250 +1,88 @@
-"use client";
+import { Info } from "lucide-react";
+import type { Metadata } from "next";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { getSession } from "@/lib/auth/session";
+import { company } from "@/lib/config/company";
+import { getSettings } from "@/lib/services/settings";
+import { enumLabel } from "@/lib/types/database";
+import { SettingRow } from "./setting-row";
 
-import { Building2, User, Bell } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+export const metadata: Metadata = { title: "Settings" };
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const [session, settings] = await Promise.all([getSession(), getSettings()]);
+  const canEdit = session?.role === "admin" || session?.role === "dev";
+
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="font-heading text-2xl font-bold text-brand-dark mb-1">
-          Settings
-        </h1>
-        <p className="text-sm text-brand-body">
-          Manage your company, profile, and notification settings.
-        </p>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Settings"
+        description={
+          canEdit
+            ? "System configuration values used across the portal."
+            : "System configuration (read-only - only administrators can edit)."
+        }
+      />
 
-      <div className="space-y-6">
-        {/* Company Settings */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-brand-border">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-brand-light flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-brand-primary" />
-            </div>
-            <div>
-              <h2 className="font-heading text-lg font-semibold text-brand-dark">
-                Company Settings
-              </h2>
-              <p className="text-xs text-brand-body">
-                Manage company information and business details
-              </p>
-            </div>
-          </div>
-          <div className="grid sm:grid-cols-2 gap-5">
-            <div>
-              <label className="block text-sm font-medium text-brand-dark mb-1.5">
-                Company Name
-              </label>
-              <Input
-                defaultValue="VayitaGrow BioOrganics Pvt. Ltd."
-                className="rounded-xl h-11"
+      <div className="grid gap-4 lg:grid-cols-3">
+        <section aria-labelledby="system-settings" className="rounded-xl border bg-card lg:col-span-2">
+          <h2 id="system-settings" className="border-b p-5 pb-4 font-sans text-base font-semibold">
+            System settings
+          </h2>
+          <ul className="divide-y">
+            {settings.map((setting) => (
+              <SettingRow
+                key={setting.settingKey}
+                settingKey={setting.settingKey}
+                settingValue={setting.settingValue}
+                canEdit={canEdit}
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-brand-dark mb-1.5">
-                Registration Number
-              </label>
-              <Input
-                defaultValue="U01100WB2024PTC123456"
-                className="rounded-xl h-11"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-brand-dark mb-1.5">
-                GST Number
-              </label>
-              <Input
-                defaultValue="19AABCV1234A1Z5"
-                className="rounded-xl h-11"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-brand-dark mb-1.5">
-                Business Phone
-              </label>
-              <Input
-                defaultValue="+91 9876543210"
-                className="rounded-xl h-11"
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-brand-dark mb-1.5">
-                Registered Address
-              </label>
-              <Input
-                defaultValue="Kolkata, West Bengal, India"
-                className="rounded-xl h-11"
-              />
-            </div>
-          </div>
-          <div className="mt-5 flex justify-end">
-            <Button className="bg-brand-primary hover:bg-brand-secondary text-white rounded-xl px-6 h-10 text-sm font-medium">
-              Save Changes
-            </Button>
-          </div>
-        </div>
-
-        {/* Profile Settings */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-brand-border">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-brand-light flex items-center justify-center">
-              <User className="w-5 h-5 text-brand-primary" />
-            </div>
-            <div>
-              <h2 className="font-heading text-lg font-semibold text-brand-dark">
-                Profile Settings
-              </h2>
-              <p className="text-xs text-brand-body">
-                Update your personal information and credentials
-              </p>
-            </div>
-          </div>
-          <div className="grid sm:grid-cols-2 gap-5">
-            <div>
-              <label className="block text-sm font-medium text-brand-dark mb-1.5">
-                Full Name
-              </label>
-              <Input defaultValue="Admin User" className="rounded-xl h-11" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-brand-dark mb-1.5">
-                Email
-              </label>
-              <Input
-                defaultValue="admin@vayitagrow.com"
-                className="rounded-xl h-11"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-brand-dark mb-1.5">
-                Phone
-              </label>
-              <Input
-                defaultValue="+91 9876543210"
-                className="rounded-xl h-11"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-brand-dark mb-1.5">
-                Role
-              </label>
-              <Input
-                defaultValue="Administrator"
-                className="rounded-xl h-11"
-                disabled
-              />
-            </div>
-          </div>
-          <Separator className="my-5" />
-          <h3 className="text-sm font-semibold text-brand-dark mb-4">
-            Change Password
-          </h3>
-          <div className="grid sm:grid-cols-2 gap-5">
-            <div>
-              <label className="block text-sm font-medium text-brand-dark mb-1.5">
-                Current Password
-              </label>
-              <Input
-                type="password"
-                placeholder="Enter current password"
-                className="rounded-xl h-11"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-brand-dark mb-1.5">
-                New Password
-              </label>
-              <Input
-                type="password"
-                placeholder="Enter new password"
-                className="rounded-xl h-11"
-              />
-            </div>
-          </div>
-          <div className="mt-5 flex justify-end">
-            <Button className="bg-brand-primary hover:bg-brand-secondary text-white rounded-xl px-6 h-10 text-sm font-medium">
-              Update Profile
-            </Button>
-          </div>
-        </div>
-
-        {/* Notification Settings */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-brand-border">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-brand-light flex items-center justify-center">
-              <Bell className="w-5 h-5 text-brand-primary" />
-            </div>
-            <div>
-              <h2 className="font-heading text-lg font-semibold text-brand-dark">
-                Notification Settings
-              </h2>
-              <p className="text-xs text-brand-body">
-                Configure how and when you receive notifications
-              </p>
-            </div>
-          </div>
-          <div className="space-y-4">
-            {[
-              {
-                title: "Order Notifications",
-                description: "Get notified when new orders are placed or status changes",
-                enabled: true,
-              },
-              {
-                title: "Client Updates",
-                description: "Receive alerts for new client registrations and updates",
-                enabled: true,
-              },
-              {
-                title: "Field Report Alerts",
-                description: "Get notified when new field reports are submitted",
-                enabled: true,
-              },
-              {
-                title: "Statement Reminders",
-                description: "Receive reminders for pending statement generation",
-                enabled: false,
-              },
-              {
-                title: "Weekly Summary",
-                description: "Receive a weekly summary of business operations",
-                enabled: true,
-              },
-            ].map((item) => (
-              <div
-                key={item.title}
-                className="flex items-center justify-between p-4 rounded-xl bg-brand-section border border-brand-border"
-              >
-                <div>
-                  <p className="text-sm font-medium text-brand-dark">
-                    {item.title}
-                  </p>
-                  <p className="text-xs text-brand-body mt-0.5">
-                    {item.description}
-                  </p>
-                </div>
-                <div
-                  className={`w-10 h-6 rounded-full flex items-center cursor-pointer transition-colors ${
-                    item.enabled ? "bg-brand-primary" : "bg-gray-300"
-                  }`}
-                >
-                  <div
-                    className={`w-4 h-4 rounded-full bg-white shadow-sm transform transition-transform ${
-                      item.enabled ? "translate-x-5" : "translate-x-1"
-                    }`}
-                  />
-                </div>
-              </div>
             ))}
-          </div>
-          <div className="mt-5 flex justify-end">
-            <Button className="bg-brand-primary hover:bg-brand-secondary text-white rounded-xl px-6 h-10 text-sm font-medium">
-              Save Preferences
-            </Button>
-          </div>
+          </ul>
+        </section>
+
+        <div className="space-y-4">
+          <section aria-labelledby="account-info" className="rounded-xl border bg-card p-5">
+            <h2 id="account-info" className="mb-4 font-sans text-base font-semibold">
+              Your account
+            </h2>
+            <dl className="space-y-3 text-sm">
+              <div>
+                <dt className="text-xs text-muted-foreground">Username</dt>
+                <dd className="font-medium">{session?.username}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted-foreground">Role</dt>
+                <dd className="font-medium capitalize">
+                  {session ? enumLabel(session.role) : "-"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted-foreground">Organization</dt>
+                <dd className="font-medium">{company.legalName}</dd>
+              </div>
+            </dl>
+            <p className="mt-4 border-t pt-3 text-xs leading-relaxed text-muted-foreground">
+              Passwords are managed by the administrator - contact them for a reset. There is
+              no self-service password change, by design.
+            </p>
+          </section>
+
+          <section
+            aria-labelledby="demo-note"
+            className="rounded-xl border border-dashed bg-muted/50 p-5"
+          >
+            <h2 id="demo-note" className="mb-2 flex items-center gap-2 font-sans text-sm font-semibold">
+              <Info aria-hidden className="size-4 text-brand-600" />
+              About this environment
+            </h2>
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              This portal currently runs on an in-memory demonstration data layer. All changes
+              behave like production but reset when the server restarts. The production
+              database design (PostgreSQL with full audit, 2FA-ready authentication, and file
+              storage) is documented and ready for the backend phase.
+            </p>
+          </section>
         </div>
       </div>
     </div>

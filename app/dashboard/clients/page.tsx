@@ -1,85 +1,138 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { clients } from "@/lib/data";
+import { Users } from "lucide-react";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
+import { DataTablePagination } from "@/components/shared/DataTablePagination";
+import { FilterPills } from "@/components/shared/FilterPills";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { SearchInput } from "@/components/shared/SearchInput";
+import { SortableHeader } from "@/components/shared/SortableHeader";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { company } from "@/lib/config/company";
+import { formatDate } from "@/lib/format";
+import { getCustomers } from "@/lib/services/customers";
+import type { CustomerWithStats } from "@/lib/types/customer";
+import { CUSTOMER_STATUSES, type CustomerStatus } from "@/lib/types/database";
+import { paramNumber, paramString } from "@/lib/url";
+import { ClientDialog } from "./client-dialog";
 
-export default function ClientsPage() {
-  return (
-    <div>
-      <div className="mb-8">
-        <h1 className="font-heading text-2xl font-bold text-brand-dark mb-1">
-          Clients
-        </h1>
-        <p className="text-sm text-brand-body">
-          Manage your dealer and distributor client records.
-        </p>
-      </div>
+export const metadata: Metadata = { title: "Clients" };
 
-      <div className="bg-white rounded-2xl shadow-sm border border-brand-border overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-brand-section">
-                <TableHead className="font-semibold text-brand-dark">
-                  Client Name
-                </TableHead>
-                <TableHead className="font-semibold text-brand-dark">
-                  State
-                </TableHead>
-                <TableHead className="font-semibold text-brand-dark">
-                  Contact Person
-                </TableHead>
-                <TableHead className="font-semibold text-brand-dark">
-                  Phone
-                </TableHead>
-                <TableHead className="font-semibold text-brand-dark">
-                  Status
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {clients.map((client) => (
-                <TableRow
-                  key={client.id}
-                  className="hover:bg-brand-section/50 transition-colors"
-                >
-                  <TableCell className="font-medium text-brand-dark">
-                    {client.name}
-                  </TableCell>
-                  <TableCell className="text-brand-body">
-                    {client.state}
-                  </TableCell>
-                  <TableCell className="text-brand-body">
-                    {client.contactPerson}
-                  </TableCell>
-                  <TableCell className="text-brand-body font-mono text-xs">
-                    {client.phone}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      className={`rounded-full text-xs font-medium px-2.5 py-0.5 ${
-                        client.status === "Active"
-                          ? "bg-green-50 text-green-700 border-green-200"
-                          : client.status === "New"
-                          ? "bg-blue-50 text-blue-700 border-blue-200"
-                          : "bg-gray-50 text-gray-600 border-gray-200"
-                      }`}
-                    >
-                      {client.status}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+const PATH = "/dashboard/clients";
+
+export default async function ClientsPage(props: PageProps<"/dashboard/clients">) {
+  const searchParams = await props.searchParams;
+  const statusParam = paramString(searchParams, "status");
+  const status = CUSTOMER_STATUSES.includes(statusParam as CustomerStatus)
+    ? (statusParam as CustomerStatus)
+    : undefined;
+
+  const page = await getCustomers({
+    query: paramString(searchParams, "query"),
+    page: paramNumber(searchParams, "page"),
+    sort: paramString(searchParams, "sort"),
+    dir: paramString(searchParams, "dir") === "desc" ? "desc" : "asc",
+    status,
+    state: paramString(searchParams, "state"),
+  });
+
+  const columns: DataTableColumn<CustomerWithStats>[] = [
+    {
+      key: "name",
+      header: (
+        <SortableHeader field="fullName" pathname={PATH} searchParams={searchParams}>
+          Client
+        </SortableHeader>
+      ),
+      cell: (customer) => (
+        <div>
+          <Link
+            href={`/dashboard/clients/${customer.customerId}`}
+            className="rounded-sm font-medium hover:text-brand-700 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          >
+            {customer.fullName}
+          </Link>
+          <p className="text-xs text-muted-foreground">{customer.address}</p>
         </div>
+      ),
+    },
+    {
+      key: "state",
+      header: (
+        <SortableHeader field="state" pathname={PATH} searchParams={searchParams}>
+          State
+        </SortableHeader>
+      ),
+      cell: (customer) => customer.state,
+    },
+    {
+      key: "phone",
+      header: "Phone",
+      cell: (customer) => <span className="text-muted-foreground">{customer.phone}</span>,
+    },
+    {
+      key: "orders",
+      header: (
+        <SortableHeader field="orderCount" pathname={PATH} searchParams={searchParams}>
+          Orders
+        </SortableHeader>
+      ),
+      cell: (customer) => (
+        <div>
+          <p className="tabular-nums">{customer.orderCount}</p>
+          {customer.lastOrderAt ? (
+            <p className="text-xs text-muted-foreground">last {formatDate(customer.lastOrderAt)}</p>
+          ) : null}
+        </div>
+      ),
+    },
+    {
+      key: "status",
+      header: "Status",
+      cell: (customer) => <StatusBadge status={customer.status} />,
+    },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title="Clients"
+        description="Dealers, distributors, retailers, and institutional buyers."
+        actions={<ClientDialog />}
+      />
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-4">
+          <FilterPills
+            param="status"
+            pathname={PATH}
+            searchParams={searchParams}
+            options={CUSTOMER_STATUSES.map((s) => ({ value: s, label: s }))}
+          />
+          <FilterPills
+            param="state"
+            pathname={PATH}
+            searchParams={searchParams}
+            allLabel="Both states"
+            options={company.operatingStates.map((s) => ({ value: s, label: s }))}
+          />
+        </div>
+        <SearchInput placeholder="Search clients…" />
       </div>
+
+      <DataTable
+        columns={columns}
+        rows={page.items}
+        rowKey={(customer) => customer.customerId}
+        empty={{
+          icon: Users,
+          title: "No clients found",
+          hint: "Adjust the filters, or add a new client record.",
+          action: <ClientDialog />,
+        }}
+      />
+
+      <DataTablePagination page={page} pathname={PATH} searchParams={searchParams} itemNoun="clients" />
     </div>
   );
 }

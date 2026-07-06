@@ -1,23 +1,41 @@
 import type { Metadata } from "next";
-import { Inter, Poppins } from "next/font/google";
+import { Fraunces, Inter } from "next/font/google";
+import { Toaster } from "sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { siteConfig } from "@/lib/config/site";
 import "./globals.css";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
-  weight: ["400", "500"],
+  display: "swap",
 });
 
-const poppins = Poppins({
-  variable: "--font-poppins",
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
-  weight: ["600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "VayitaGrow BioOrganics - Sustainable Agricultural Solutions",
-  description:
-    "VAYITAGROW BIOORGANICS PRIVATE LIMITED - Manufacturing and marketing agricultural inputs for sustainable farming. Bio fertilizers, organic fertilizers, growth promoters, and micronutrients.",
+  metadataBase: new URL(siteConfig.url),
+  title: {
+    default: siteConfig.defaultTitle,
+    template: siteConfig.titleTemplate,
+  },
+  description: siteConfig.description,
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/vayitagrow_logo.svg", type: "image/svg+xml" },
+    ],
+    apple: [{ url: "/vayitagrow_logo.svg" }],
+  },
+  openGraph: {
+    type: "website",
+    siteName: siteConfig.name,
+    locale: "en_IN",
+  },
 };
 
 export default function RootLayout({
@@ -28,9 +46,16 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${poppins.variable} h-full antialiased`}
+      data-scroll-behavior="smooth"
+      className={`${inter.variable} ${fraunces.variable} h-full`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      {/* suppressHydrationWarning: browser extensions (ColorZilla, Demoway, …)
+          inject attributes into <body> before React hydrates; this silences
+          that false-positive mismatch for the body element only. */}
+      <body className="flex min-h-full flex-col" suppressHydrationWarning>
+        <TooltipProvider>{children}</TooltipProvider>
+        <Toaster position="top-right" richColors closeButton />
+      </body>
     </html>
   );
 }

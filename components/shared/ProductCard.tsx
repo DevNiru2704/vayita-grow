@@ -1,56 +1,44 @@
+import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ImageOff } from "lucide-react";
-import { Product } from "@/lib/data";
+import type { ProductWithDetails } from "@/lib/types/catalog";
 
-interface ProductCardProps {
-  product: Product;
-}
-
-export default function ProductCard({ product }: ProductCardProps) {
-  // Check if a valid image cutout exists and is not an empty string
-  const hasValidImage = product.imagecut && product.imagecut.trim() !== "";
+/** Public catalog card: real product cutout on a tinted surface. */
+export function ProductCard({ product }: { product: ProductWithDetails }) {
+  const imageSrc = product.details.imageCutoutUrl ?? product.imageUrl;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-brand-border overflow-hidden group hover:shadow-md transition-shadow">
-
-      {/* Transparent Image Container */}
-      <div className="relative h-56 bg-brand-light border-b border-brand-border overflow-hidden">
-        {hasValidImage ? (
+    <article className="group relative flex flex-col overflow-hidden rounded-xl border bg-card transition-[box-shadow,translate] duration-200 hover:-translate-y-0.5 hover:shadow-md">
+      <div className="relative h-52 overflow-hidden border-b bg-brand-50">
+        {imageSrc ? (
           <Image
-            src={product.imagecut}
-            alt={`${product.name} packaging`}
+            src={imageSrc}
+            alt={`${product.name} product pack`}
             fill
-            className="object-contain p-2 group-hover:scale-110 transition-transform duration-500"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-contain p-4 transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
-        ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-brand-body opacity-40">
-            <ImageOff className="w-10 h-10 stroke-[1.5]" />
-            <span className="text-xs font-medium">Image Not Available</span>
-          </div>
-        )}
+        ) : null}
       </div>
-
-      {/* Content */}
-      <div className="p-5">
-        <span className="inline-block text-xs font-medium text-brand-secondary bg-brand-light px-2.5 py-1 rounded-full mb-3">
-          {product.category}
-        </span>
-        <h3 className="font-heading text-lg font-semibold text-brand-dark mb-2 group-hover:text-brand-primary transition-colors">
-          {product.name}
+      <div className="flex flex-1 flex-col gap-2 p-5">
+        <p className="text-xs font-medium text-brand-600">{product.categoryName}</p>
+        <h3 className="font-sans text-lg font-semibold tracking-tight">
+          <Link
+            href={`/products/${product.slug}`}
+            className="after:absolute after:inset-0 focus-visible:outline-none"
+          >
+            {product.name}
+          </Link>
         </h3>
-        <p className="text-sm text-brand-body leading-relaxed mb-4 line-clamp-2">
-          {product.shortDescription}
+        <p className="line-clamp-2 text-sm text-muted-foreground">
+          {product.details.shortDescription}
         </p>
-        <Link
-          href={`/products/${product.slug}`}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-primary hover:text-brand-secondary transition-colors"
-        >
-          View Details
-          <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
-        </Link>
+        <span className="mt-auto inline-flex items-center gap-1.5 pt-2 text-sm font-medium text-brand-600">
+          View details
+          <ArrowRight aria-hidden className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+        </span>
       </div>
-    </div>
+      <span className="pointer-events-none absolute inset-0 rounded-xl ring-ring/50 ring-inset group-has-[a:focus-visible]:ring-2" />
+    </article>
   );
 }
