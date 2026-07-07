@@ -3,12 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireSession } from "@/lib/auth/guards";
+import { isSupabase } from "@/lib/db/source";
 import { recordActivity } from "@/lib/mock/activity";
 import { db, latency, nextId, nowIso } from "@/lib/mock/store";
+import * as inventoryPg from "@/lib/services/inventory.pg";
 import type { ActionResult } from "@/lib/types/common";
 import type { StockAdjustmentInput, SupplierInput } from "@/lib/types/inventory";
 
-// MOCK IMPLEMENTATION - replace store mutations with Supabase queries.
+// Validation + auth run here; data access dispatches to mock or Postgres
+// (lib/services/inventory.pg.ts) based on DATA_SOURCE.
 
 const adjustmentSchema = z.object({
   inventoryId: z.number().int().positive(),
@@ -21,7 +24,6 @@ const adjustmentSchema = z.object({
 
 export async function adjustStock(input: StockAdjustmentInput): Promise<ActionResult> {
   const session = await requireSession();
-  await latency();
   const parsed = adjustmentSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -30,6 +32,8 @@ export async function adjustStock(input: StockAdjustmentInput): Promise<ActionRe
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
+  if (isSupabase) return inventoryPg.adjustStock(parsed.data, session);
+  await latency();
 
   const store = db();
   const record = store.inventory.find((i) => i.inventoryId === parsed.data.inventoryId);
@@ -75,7 +79,6 @@ const supplierSchema = z.object({
 
 export async function createSupplier(input: SupplierInput): Promise<ActionResult<{ id: number }>> {
   const session = await requireSession();
-  await latency();
   const parsed = supplierSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -84,6 +87,8 @@ export async function createSupplier(input: SupplierInput): Promise<ActionResult
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
+  if (isSupabase) return inventoryPg.createSupplier(parsed.data, session);
+  await latency();
 
   const store = db();
   const supplierId = nextId(store.suppliers, "supplierId");
@@ -101,7 +106,6 @@ export async function createSupplier(input: SupplierInput): Promise<ActionResult
 
 export async function updateSupplier(id: number, input: SupplierInput): Promise<ActionResult> {
   const session = await requireSession();
-  await latency();
   const parsed = supplierSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -110,6 +114,8 @@ export async function updateSupplier(id: number, input: SupplierInput): Promise<
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
+  if (isSupabase) return inventoryPg.updateSupplier(id, parsed.data, session);
+  await latency();
 
   const supplier = db().suppliers.find((s) => s.supplierId === id);
   if (!supplier) return { ok: false, error: "Supplier not found." };
