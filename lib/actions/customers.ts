@@ -4,13 +4,16 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { company } from "@/lib/config/company";
 import { requireSession } from "@/lib/auth/guards";
+import { isSupabase } from "@/lib/db/source";
 import { recordActivity } from "@/lib/mock/activity";
 import { db, latency, nextId, nowIso } from "@/lib/mock/store";
+import * as customersPg from "@/lib/services/customers.pg";
 import type { ActionResult } from "@/lib/types/common";
 import { CUSTOMER_STATUSES } from "@/lib/types/database";
 import type { CustomerInput } from "@/lib/types/customer";
 
-// MOCK IMPLEMENTATION - replace store mutations with Supabase queries.
+// Validation + auth run here; data access dispatches to the mock store or
+// Postgres (lib/services/customers.pg.ts) based on DATA_SOURCE.
 
 const customerSchema = z.object({
   fullName: z.string().trim().min(3, "Business name must be at least 3 characters").max(150),
@@ -31,7 +34,6 @@ function revalidateCustomerRoutes(): void {
 
 export async function createCustomer(input: CustomerInput): Promise<ActionResult<{ id: number }>> {
   const session = await requireSession();
-  await latency();
   const parsed = customerSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -40,6 +42,8 @@ export async function createCustomer(input: CustomerInput): Promise<ActionResult
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
+  if (isSupabase) return customersPg.createCustomer(parsed.data, session);
+  await latency();
 
   const store = db();
   if (store.customers.some((c) => c.phone === parsed.data.phone)) {
@@ -65,7 +69,6 @@ export async function createCustomer(input: CustomerInput): Promise<ActionResult
 
 export async function updateCustomer(id: number, input: CustomerInput): Promise<ActionResult> {
   const session = await requireSession();
-  await latency();
   const parsed = customerSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -74,6 +77,8 @@ export async function updateCustomer(id: number, input: CustomerInput): Promise<
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
+  if (isSupabase) return customersPg.updateCustomer(id, parsed.data, session);
+  await latency();
 
   const store = db();
   const customer = store.customers.find((c) => c.customerId === id);
@@ -99,7 +104,6 @@ export async function addCustomerNote(
   noteText: string,
 ): Promise<ActionResult> {
   const session = await requireSession();
-  await latency();
 
   const trimmed = noteText.trim();
   if (trimmed.length < 5) {
@@ -109,6 +113,8 @@ export async function addCustomerNote(
       fieldErrors: { noteText: ["Note must be at least 5 characters"] },
     };
   }
+  if (isSupabase) return customersPg.addCustomerNote(customerId, trimmed, session);
+  await latency();
 
   const store = db();
   if (!store.customers.some((c) => c.customerId === customerId)) {
