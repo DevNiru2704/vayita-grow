@@ -6,7 +6,7 @@
  * Supabase integration is a drop-in swap.
  */
 
-export const ROLE_NAMES = ["dev", "admin", "sub_admin"] as const;
+export const ROLE_NAMES = ["dev", "admin", "staff"] as const;
 export type RoleName = (typeof ROLE_NAMES)[number];
 
 export const ORDER_STATUSES = [
@@ -44,6 +44,7 @@ export const ENTITY_TYPES = [
   "ORDER",
   "INVENTORY",
   "DELIVERY",
+  "QUOTATION",
   "SYSTEM",
 ] as const;
 export type EntityType = (typeof ENTITY_TYPES)[number];
@@ -54,6 +55,10 @@ export type FieldReportStatus = (typeof FIELD_REPORT_STATUSES)[number];
 
 export const CUSTOMER_STATUSES = ["Active", "Inactive", "New"] as const;
 export type CustomerStatus = (typeof CUSTOMER_STATUSES)[number];
+
+// EXTENSION: not in DB design v1.2.0 - quotations module (see 0007_quotations.sql).
+export const QUOTATION_STATUSES = ["Draft", "Sent", "Accepted", "Rejected", "Expired"] as const;
+export type QuotationStatus = (typeof QUOTATION_STATUSES)[number];
 
 /** Human-readable label for DB enum values that use underscores. */
 export function enumLabel(value: string): string {
