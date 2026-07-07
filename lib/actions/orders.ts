@@ -3,13 +3,16 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireSession } from "@/lib/auth/guards";
+import { isSupabase } from "@/lib/db/source";
 import { recordActivity } from "@/lib/mock/activity";
 import { db, latency, nextId, nowIso } from "@/lib/mock/store";
+import * as ordersPg from "@/lib/services/orders.pg";
 import type { ActionResult } from "@/lib/types/common";
 import { ORDER_STATUSES, PAYMENT_METHODS, type OrderStatus } from "@/lib/types/database";
 import type { OrderInput, PaymentInput } from "@/lib/types/order";
 
-// MOCK IMPLEMENTATION - replace store mutations with Supabase queries.
+// Validation + auth run here; data access dispatches to mock or Postgres
+// (lib/services/orders.pg.ts) based on DATA_SOURCE.
 
 const orderSchema = z.object({
   customerId: z.number().int().positive("Select a client"),
@@ -30,7 +33,6 @@ function revalidateOrderRoutes(): void {
 
 export async function createOrder(input: OrderInput): Promise<ActionResult<{ id: number }>> {
   const session = await requireSession();
-  await latency();
   const parsed = orderSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -39,6 +41,8 @@ export async function createOrder(input: OrderInput): Promise<ActionResult<{ id:
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
+  if (isSupabase) return ordersPg.createOrder(parsed.data, session);
+  await latency();
 
   const store = db();
   if (!store.customers.some((c) => c.customerId === parsed.data.customerId)) {
@@ -85,10 +89,11 @@ export async function updateOrderStatus(
   status: OrderStatus,
 ): Promise<ActionResult> {
   const session = await requireSession();
-  await latency();
   if (!ORDER_STATUSES.includes(status)) {
     return { ok: false, error: "Invalid order status." };
   }
+  if (isSupabase) return ordersPg.updateOrderStatus(orderId, status, session);
+  await latency();
 
   const order = db().orders.find((o) => o.orderId === orderId);
   if (!order) return { ok: false, error: "Order not found." };
@@ -110,7 +115,6 @@ const paymentSchema = z.object({
 
 export async function recordPayment(input: PaymentInput): Promise<ActionResult> {
   const session = await requireSession();
-  await latency();
   const parsed = paymentSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -119,6 +123,8 @@ export async function recordPayment(input: PaymentInput): Promise<ActionResult> 
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
+  if (isSupabase) return ordersPg.recordPayment(parsed.data, session);
+  await latency();
 
   const store = db();
   const order = store.orders.find((o) => o.orderId === parsed.data.orderId);

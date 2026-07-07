@@ -3,13 +3,16 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireSession } from "@/lib/auth/guards";
+import { isSupabase } from "@/lib/db/source";
 import { recordActivity } from "@/lib/mock/activity";
 import { db, latency, nextId, nowIso } from "@/lib/mock/store";
+import * as deliveriesPg from "@/lib/services/deliveries.pg";
 import type { ActionResult } from "@/lib/types/common";
 import { DELIVERY_STATUSES } from "@/lib/types/database";
 import type { DeliveryInput, DeliveryUpdateInput } from "@/lib/types/delivery";
 
-// MOCK IMPLEMENTATION - replace store mutations with Supabase queries.
+// Validation + auth run here; data access dispatches to mock or Postgres
+// (lib/services/deliveries.pg.ts) based on DATA_SOURCE.
 
 const deliverySchema = z.object({
   orderId: z.number().int().positive(),
@@ -25,7 +28,6 @@ function revalidateDeliveryRoutes(orderId?: number): void {
 
 export async function createDelivery(input: DeliveryInput): Promise<ActionResult<{ id: number }>> {
   const session = await requireSession();
-  await latency();
   const parsed = deliverySchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -34,6 +36,8 @@ export async function createDelivery(input: DeliveryInput): Promise<ActionResult
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
+  if (isSupabase) return deliveriesPg.createDelivery(parsed.data, session);
+  await latency();
 
   const store = db();
   const order = store.orders.find((o) => o.orderId === parsed.data.orderId);
@@ -81,7 +85,6 @@ const updateSchema = z.object({
 
 export async function addDeliveryUpdate(input: DeliveryUpdateInput): Promise<ActionResult> {
   const session = await requireSession();
-  await latency();
   const parsed = updateSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -90,6 +93,8 @@ export async function addDeliveryUpdate(input: DeliveryUpdateInput): Promise<Act
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
+  if (isSupabase) return deliveriesPg.addDeliveryUpdate(parsed.data, session);
+  await latency();
 
   const store = db();
   const delivery = store.deliveries.find((d) => d.deliveryId === parsed.data.deliveryId);
