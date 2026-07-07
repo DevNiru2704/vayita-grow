@@ -3,14 +3,16 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireSession } from "@/lib/auth/guards";
+import { isSupabase } from "@/lib/db/source";
 import { recordActivity } from "@/lib/mock/activity";
 import { db, latency, nextId, nowIso } from "@/lib/mock/store";
+import * as fieldReportsPg from "@/lib/services/field-reports.pg";
 import type { ActionResult } from "@/lib/types/common";
 import { FIELD_REPORT_STATUSES, type FieldReportStatus } from "@/lib/types/database";
 import type { FieldReportInput } from "@/lib/types/field-report";
 
-// EXTENSION domain: field reports have no table in DB design v1.2.0 yet.
-// MOCK IMPLEMENTATION - replace store mutations with Supabase queries.
+// Validation + auth run here; data access dispatches to mock or Postgres
+// (lib/services/field-reports.pg.ts) based on DATA_SOURCE.
 
 const reportSchema = z.object({
   visitDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Select a visit date"),
@@ -25,7 +27,6 @@ export async function createFieldReport(
   input: FieldReportInput,
 ): Promise<ActionResult<{ id: number }>> {
   const session = await requireSession();
-  await latency();
   const parsed = reportSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -34,6 +35,8 @@ export async function createFieldReport(
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
+  if (isSupabase) return fieldReportsPg.createFieldReport(parsed.data, session);
+  await latency();
 
   const store = db();
   if (
@@ -63,10 +66,11 @@ export async function updateFieldReportStatus(
   status: FieldReportStatus,
 ): Promise<ActionResult> {
   const session = await requireSession();
-  await latency();
   if (!FIELD_REPORT_STATUSES.includes(status)) {
     return { ok: false, error: "Invalid status." };
   }
+  if (isSupabase) return fieldReportsPg.updateFieldReportStatus(reportId, status, session);
+  await latency();
 
   const report = db().fieldReports.find((r) => r.reportId === reportId);
   if (!report) return { ok: false, error: "Field report not found." };

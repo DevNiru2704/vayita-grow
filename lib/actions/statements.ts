@@ -3,14 +3,16 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireSession } from "@/lib/auth/guards";
+import { isSupabase } from "@/lib/db/source";
 import { recordActivity } from "@/lib/mock/activity";
 import { db, latency, nextId, nowIso } from "@/lib/mock/store";
+import * as statementsPg from "@/lib/services/statements.pg";
 import type { ActionResult } from "@/lib/types/common";
 import type { StatementInput } from "@/lib/types/statement";
 
-// EXTENSION domain: statements have no table in DB design v1.2.0 yet.
-// MOCK IMPLEMENTATION - replace store mutations with Supabase queries +
-// file storage for the actual statement PDFs.
+// Validation + auth run here; data access dispatches to mock or Postgres
+// (lib/services/statements.pg.ts) based on DATA_SOURCE. Statement PDF file
+// storage arrives with the backend phase.
 
 const statementSchema = z.object({
   customerId: z.number().int().positive("Select a client"),
@@ -21,7 +23,6 @@ export async function createStatement(
   input: StatementInput,
 ): Promise<ActionResult<{ id: number }>> {
   const session = await requireSession();
-  await latency();
   const parsed = statementSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -30,6 +31,8 @@ export async function createStatement(
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
+  if (isSupabase) return statementsPg.createStatement(parsed.data, session);
+  await latency();
 
   const store = db();
   if (!store.customers.some((c) => c.customerId === parsed.data.customerId)) {
