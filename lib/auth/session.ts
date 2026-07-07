@@ -1,76 +1,89 @@
 import "server-only";
-import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
-import { ROLE_NAMES } from "@/lib/types/database";
+import { ROLE_NAMES, type RoleName } from "@/lib/types/database";
 import type { SessionUser } from "@/lib/types/user";
+import { blacklist, isBlacklisted } from "./blacklist";
+import { newJti, signToken, verifyToken } from "./jwt";
 
 /**
- * DEMO SESSION - swap point for Supabase Auth / real JWT sessions.
- * The cookie carries an HMAC-signed JSON payload; good enough to keep the
- * demo portal honest (no forgeable role escalation via cookie editing),
- * NOT production authentication.
+ * Cookie-based auth. A signed session JWT (`vg_session`) carries identity; a
+ * short-lived 2FA challenge JWT (`vg_2fa`) bridges password → TOTP during
+ * login. Both are httpOnly and revocable via the token blacklist.
  */
 
 export const SESSION_COOKIE = "vg_session";
-const MAX_AGE_SECONDS = 60 * 60 * 8; // 8-hour demo session
+export const CHALLENGE_COOKIE = "vg_2fa";
 
-function secret(): string {
-  return process.env.SESSION_SECRET ?? "vayitagrow-demo-secret-not-for-production";
+const SESSION_TTL = 60 * 60 * 8; // 8 hours
+const CHALLENGE_TTL = 60 * 5; // 5 minutes
+
+function cookieOptions(maxAge: number) {
+  return {
+    httpOnly: true,
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production",
+    maxAge,
+    path: "/",
+  };
 }
 
-function sign(payload: string): string {
-  return createHmac("sha256", secret()).update(payload).digest("base64url");
+function toSessionUser(claims: { sub?: string; username: string; role: string }): SessionUser | null {
+  const userId = Number(claims.sub);
+  if (!Number.isInteger(userId) || !ROLE_NAMES.includes(claims.role as RoleName)) return null;
+  return { userId, username: claims.username, role: claims.role as RoleName };
 }
 
-export function encodeSession(user: SessionUser): string {
-  const payload = Buffer.from(JSON.stringify(user)).toString("base64url");
-  return `${payload}.${sign(payload)}`;
-}
+// --- Session -----------------------------------------------------------------
 
-export function decodeSession(token: string | undefined): SessionUser | null {
-  if (!token) return null;
-  const [payload, signature] = token.split(".");
-  if (!payload || !signature) return null;
-
-  const expected = sign(payload);
-  const a = Buffer.from(signature);
-  const b = Buffer.from(expected);
-  if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
-
-  try {
-    const parsed: unknown = JSON.parse(Buffer.from(payload, "base64url").toString());
-    if (
-      typeof parsed === "object" &&
-      parsed !== null &&
-      typeof (parsed as SessionUser).userId === "number" &&
-      typeof (parsed as SessionUser).username === "string" &&
-      ROLE_NAMES.includes((parsed as SessionUser).role)
-    ) {
-      return parsed as SessionUser;
-    }
-    return null;
-  } catch {
-    return null;
-  }
+export async function createSession(user: SessionUser): Promise<void> {
+  const { token } = await signToken(
+    { sub: String(user.userId), username: user.username, role: user.role },
+    { jti: newJti(), ttlSeconds: SESSION_TTL },
+  );
+  (await cookies()).set(SESSION_COOKIE, token, cookieOptions(SESSION_TTL));
 }
 
 export async function getSession(): Promise<SessionUser | null> {
-  const store = await cookies();
-  return decodeSession(store.get(SESSION_COOKIE)?.value);
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  if (!token) return null;
+  const claims = await verifyToken(token);
+  if (!claims || claims.purpose) return null; // reject 2FA challenge tokens here
+  if (claims.jti && (await isBlacklisted(claims.jti))) return null;
+  return toSessionUser(claims);
 }
 
-export async function setSessionCookie(user: SessionUser): Promise<void> {
+export async function destroySession(): Promise<void> {
   const store = await cookies();
-  store.set(SESSION_COOKIE, encodeSession(user), {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: MAX_AGE_SECONDS,
-    path: "/",
-  });
-}
-
-export async function clearSessionCookie(): Promise<void> {
-  const store = await cookies();
+  const token = store.get(SESSION_COOKIE)?.value;
+  if (token) {
+    const claims = await verifyToken(token);
+    if (claims?.jti && claims.exp) await blacklist(Number(claims.sub), claims.jti, claims.exp);
+  }
   store.delete(SESSION_COOKIE);
+}
+
+// --- 2FA challenge -----------------------------------------------------------
+
+/** Issues the challenge cookie; returns its expiry (unix seconds) for the UI countdown. */
+export async function createChallenge(user: SessionUser): Promise<number> {
+  const { token, exp } = await signToken(
+    { sub: String(user.userId), username: user.username, role: user.role, purpose: "2fa" },
+    { jti: newJti(), ttlSeconds: CHALLENGE_TTL },
+  );
+  (await cookies()).set(CHALLENGE_COOKIE, token, cookieOptions(CHALLENGE_TTL));
+  return exp;
+}
+
+export async function getChallenge(): Promise<{ user: SessionUser; jti: string; exp: number } | null> {
+  const token = (await cookies()).get(CHALLENGE_COOKIE)?.value;
+  if (!token) return null;
+  const claims = await verifyToken(token);
+  if (!claims || claims.purpose !== "2fa" || !claims.jti || !claims.exp) return null;
+  if (await isBlacklisted(claims.jti)) return null;
+  const user = toSessionUser(claims);
+  return user ? { user, jti: claims.jti, exp: claims.exp } : null;
+}
+
+export async function clearChallenge(): Promise<void> {
+  (await cookies()).delete(CHALLENGE_COOKIE);
 }
