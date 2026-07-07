@@ -3,13 +3,16 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireSession } from "@/lib/auth/guards";
+import { isSupabase } from "@/lib/db/source";
 import { recordActivity } from "@/lib/mock/activity";
 import { db, latency, nextId, nowIso } from "@/lib/mock/store";
+import * as feedbackPg from "@/lib/services/feedback.pg";
 import type { ActionResult } from "@/lib/types/common";
 import { FEEDBACK_STATUSES, type FeedbackStatus } from "@/lib/types/database";
 import type { FeedbackInput } from "@/lib/types/feedback";
 
-// MOCK IMPLEMENTATION - replace store mutations with Supabase queries.
+// Validation + auth run here; data access dispatches to mock or Postgres
+// (lib/services/feedback.pg.ts) based on DATA_SOURCE.
 
 const ticketSchema = z.object({
   subject: z.string().trim().min(5, "Subject must be at least 5 characters").max(150),
@@ -20,7 +23,6 @@ export async function createFeedbackTicket(
   input: FeedbackInput,
 ): Promise<ActionResult<{ id: number }>> {
   const session = await requireSession();
-  await latency();
   const parsed = ticketSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -29,6 +31,8 @@ export async function createFeedbackTicket(
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
+  if (isSupabase) return feedbackPg.createFeedbackTicket(parsed.data, session);
+  await latency();
 
   const store = db();
   const feedbackId = nextId(store.feedback, "feedbackId");
@@ -51,10 +55,11 @@ export async function updateFeedbackStatus(
   status: FeedbackStatus,
 ): Promise<ActionResult> {
   const session = await requireSession();
-  await latency();
   if (!FEEDBACK_STATUSES.includes(status)) {
     return { ok: false, error: "Invalid status." };
   }
+  if (isSupabase) return feedbackPg.updateFeedbackStatus(feedbackId, status, session);
+  await latency();
 
   const ticket = db().feedback.find((f) => f.feedbackId === feedbackId);
   if (!ticket) return { ok: false, error: "Ticket not found." };
