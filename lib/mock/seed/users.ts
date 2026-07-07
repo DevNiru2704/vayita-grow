@@ -4,19 +4,19 @@ import type { RoleName } from "@/lib/types/database";
 /**
  * DEMO operational data - staff accounts for the internal portal.
  * Role model per the client call: admin (Manish) manages all accounts and
- * passwords; sub-admins are field staff with no self-service.
+ * passwords; staff are field staff with no self-service.
  */
 
 export const ROLE_BY_ID: Record<number, RoleName> = {
   1: "dev",
   2: "admin",
-  3: "sub_admin",
+  3: "staff",
 };
 
 export const ROLE_ID_BY_NAME: Record<RoleName, number> = {
   dev: 1,
   admin: 2,
-  sub_admin: 3,
+  staff: 3,
 };
 
 export const seedUsers: User[] = [
