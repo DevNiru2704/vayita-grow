@@ -1,17 +1,24 @@
 import { Info } from "lucide-react";
 import type { Metadata } from "next";
+import { ExportButton } from "@/components/shared/ExportButton";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { TWO_FA_ROLES } from "@/lib/auth/roles";
 import { getSession } from "@/lib/auth/session";
+import { get2fa } from "@/lib/auth/two-factor-store";
 import { company } from "@/lib/config/company";
 import { getSettings } from "@/lib/services/settings";
 import { enumLabel } from "@/lib/types/database";
+import { ChangePasswordCard } from "./change-password-card";
 import { SettingRow } from "./setting-row";
+import { TwoFactorCard } from "./two-factor-card";
 
 export const metadata: Metadata = { title: "Settings" };
 
 export default async function SettingsPage() {
   const [session, settings] = await Promise.all([getSession(), getSettings()]);
   const canEdit = session?.role === "admin" || session?.role === "dev";
+  const twoFaEligible = session ? TWO_FA_ROLES.includes(session.role) : false;
+  const twoFaEnabled = twoFaEligible && session ? (await get2fa(session.userId)).enabled : false;
 
   return (
     <div className="space-y-6">
@@ -22,6 +29,7 @@ export default async function SettingsPage() {
             ? "System configuration values used across the portal."
             : "System configuration (read-only - only administrators can edit)."
         }
+        actions={<ExportButton entity="settings" />}
       />
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -42,6 +50,9 @@ export default async function SettingsPage() {
         </section>
 
         <div className="space-y-4">
+          <ChangePasswordCard />
+          {twoFaEligible ? <TwoFactorCard initialEnabled={twoFaEnabled} /> : null}
+
           <section aria-labelledby="account-info" className="rounded-xl border bg-card p-5">
             <h2 id="account-info" className="mb-4 font-sans text-base font-semibold">
               Your account
@@ -63,8 +74,8 @@ export default async function SettingsPage() {
               </div>
             </dl>
             <p className="mt-4 border-t pt-3 text-xs leading-relaxed text-muted-foreground">
-              Passwords are managed by the administrator - contact them for a reset. There is
-              no self-service password change, by design.
+              Change your own password below. If you are locked out, an administrator can issue a
+              new temporary password.
             </p>
           </section>
 

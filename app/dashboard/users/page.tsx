@@ -2,13 +2,14 @@ import { UserCog } from "lucide-react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
+import { ExportButton } from "@/components/shared/ExportButton";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { getSession } from "@/lib/auth/session";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { getLoginHistory, getUsers } from "@/lib/services/users";
 import { enumLabel } from "@/lib/types/database";
 import type { UserWithRole } from "@/lib/types/user";
-import { CreateUserDialog, ResetPasswordDialog } from "./user-controls";
+import { CreateUserDialog, RecoverAccountDialog, ResetStaffPasswordDialog } from "./user-controls";
 
 export const metadata: Metadata = { title: "Users" };
 
@@ -56,12 +57,19 @@ export default async function UsersPage() {
       key: "actions",
       header: <span className="sr-only">Actions</span>,
       className: "text-right",
-      cell: (user) =>
-        user.userId === session.userId ? (
-          <span className="text-xs text-muted-foreground">This is you</span>
-        ) : (
-          <ResetPasswordDialog userId={user.userId} username={user.username} />
-        ),
+      cell: (user) => {
+        if (user.userId === session.userId) {
+          return <span className="text-xs text-muted-foreground">This is you</span>;
+        }
+        // dev recovers any account; admin may only reset staff passwords.
+        if (session.role === "dev") {
+          return <RecoverAccountDialog userId={user.userId} username={user.username} />;
+        }
+        if (user.roleName === "staff") {
+          return <ResetStaffPasswordDialog userId={user.userId} username={user.username} />;
+        }
+        return <span className="text-xs text-muted-foreground">—</span>;
+      },
     },
   ];
 
@@ -70,7 +78,12 @@ export default async function UsersPage() {
       <PageHeader
         title="Users"
         description="Staff accounts for the portal. Only administrators manage accounts and passwords."
-        actions={<CreateUserDialog />}
+        actions={
+          <>
+            <ExportButton entity="users" />
+            <CreateUserDialog creatorRole={session.role} />
+          </>
+        }
       />
 
       <DataTable
@@ -81,7 +94,7 @@ export default async function UsersPage() {
           icon: UserCog,
           title: "No users",
           hint: "Create the first staff account.",
-          action: <CreateUserDialog />,
+          action: <CreateUserDialog creatorRole={session.role} />,
         }}
       />
 

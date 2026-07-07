@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, KeyRound, UserPlus } from "lucide-react";
+import { Copy, KeyRound, LifeBuoy, UserPlus } from "lucide-react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { FormField, fieldAria } from "@/components/shared/FormField";
@@ -14,13 +14,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { createStaffUser, resetUserPassword } from "@/lib/actions/users";
+import { createUser, recoverAccount, resetStaffPassword } from "@/lib/actions/users";
+import type { RoleName } from "@/lib/types/database";
 import { cn } from "@/lib/utils";
 
-/**
- * Shows the generated temp password exactly once after create/reset -
- * mirrors the agreed workflow where the admin hands credentials to staff.
- */
+const selectClass =
+  "flex h-9 w-full rounded-lg border border-input bg-background px-3 text-sm focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none";
+
 function TempPasswordPanel({ username, password }: { username: string; password: string }) {
   return (
     <div className="space-y-3 rounded-lg border border-dashed bg-brand-50 p-4">
@@ -45,29 +45,38 @@ function TempPasswordPanel({ username, password }: { username: string; password:
         </Button>
       </div>
       <p className="text-xs text-muted-foreground">
-        Share it with the staff member directly. It is shown only once - passwords can only be
-        reset by an administrator (no self-service).
+        Share it with the account holder directly. It is shown only once — they should change it
+        after signing in.
       </p>
     </div>
   );
 }
 
-export function CreateUserDialog() {
+export function CreateUserDialog({ creatorRole }: { creatorRole: RoleName }) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [username, setUsername] = useState("");
-  const [role, setRole] = useState<"admin" | "sub_admin">("sub_admin");
+  const [role, setRole] = useState<RoleName>("staff");
   const [created, setCreated] = useState<{ username: string; password: string } | null>(null);
+
+  const roleOptions =
+    creatorRole === "dev"
+      ? [
+          { value: "staff", label: "Staff (field staff)" },
+          { value: "admin", label: "Admin (full control)" },
+          { value: "dev", label: "Developer" },
+        ]
+      : [{ value: "staff", label: "Staff (field staff)" }];
 
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     startTransition(async () => {
-      const result = await createStaffUser({ username, role });
+      const result = await createUser({ username, role });
       if (result.ok) {
         setCreated({ username, password: result.data.tempPassword });
         setFieldErrors({});
-        toast.success("Staff account created");
+        toast.success("Account created");
       } else {
         setFieldErrors(result.fieldErrors ?? {});
         toast.error(result.error);
@@ -80,7 +89,7 @@ export function CreateUserDialog() {
     if (!next) {
       setCreated(null);
       setUsername("");
-      setRole("sub_admin");
+      setRole("staff");
       setFieldErrors({});
     }
   }
@@ -93,10 +102,11 @@ export function CreateUserDialog() {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create staff account</DialogTitle>
+          <DialogTitle>Create account</DialogTitle>
           <DialogDescription>
-            Only administrators create accounts and reset passwords - staff have no
-            self-service access.
+            {creatorRole === "dev"
+              ? "Developers can create staff, admin, and developer accounts."
+              : "Administrators can create staff accounts."}
           </DialogDescription>
         </DialogHeader>
         {created ? (
@@ -121,20 +131,19 @@ export function CreateUserDialog() {
               <select
                 {...fieldAria("user-role", fieldErrors.role)}
                 value={role}
-                onChange={(e) => setRole(e.target.value as "admin" | "sub_admin")}
-                className="flex h-9 w-full rounded-lg border border-input bg-background px-3 text-sm focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+                onChange={(e) => setRole(e.target.value as RoleName)}
+                disabled={roleOptions.length === 1}
+                className={selectClass}
               >
-                <option value="sub_admin">Sub admin (field staff)</option>
-                <option value="admin">Admin (full control)</option>
+                {roleOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </FormField>
             <div className="flex justify-end gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                disabled={pending}
-                onClick={() => handleOpenChange(false)}
-              >
+              <Button type="button" variant="outline" disabled={pending} onClick={() => handleOpenChange(false)}>
                 Cancel
               </Button>
               <Button type="submit" disabled={pending}>
@@ -148,64 +157,152 @@ export function CreateUserDialog() {
   );
 }
 
-export function ResetPasswordDialog({
-  userId,
-  username,
-}: {
-  userId: number;
-  username: string;
-}) {
+/** Admin/dev resets a STAFF password by supplying the staff's current password. */
+export function ResetStaffPasswordDialog({ userId, username }: { userId: number; username: string }) {
+  const [open, setOpen] = useState(false);
+  const [pending, startTransition] = useTransition();
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  function reset() {
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setFieldErrors({});
+  }
+
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    startTransition(async () => {
+      const result = await resetStaffPassword({ userId, currentPassword, newPassword, confirmPassword });
+      if (result.ok) {
+        toast.success(`Password updated for ${username}`);
+        setOpen(false);
+        reset();
+      } else {
+        setFieldErrors(result.fieldErrors ?? {});
+        toast.error(result.error);
+      }
+    });
+  }
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) reset();
+      }}
+    >
+      <DialogTrigger className={cn(buttonVariants({ variant: "outline", size: "sm" }))} aria-label={`Reset password for ${username}`}>
+        <KeyRound aria-hidden data-icon="inline-start" />
+        Reset password
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Reset password — {username}</DialogTitle>
+          <DialogDescription>
+            Enter this staff member&apos;s current password and choose a new one.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
+          <FormField id="reset-current" label="Current staff password" errors={fieldErrors.currentPassword}>
+            <Input
+              {...fieldAria("reset-current", fieldErrors.currentPassword)}
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              autoComplete="off"
+              required
+            />
+          </FormField>
+          <FormField id="reset-new" label="New password" errors={fieldErrors.newPassword} hint="Min 8 chars with upper, lower, digit, and symbol.">
+            <Input
+              {...fieldAria("reset-new", fieldErrors.newPassword)}
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              autoComplete="new-password"
+              required
+            />
+          </FormField>
+          <FormField id="reset-confirm" label="Confirm new password" errors={fieldErrors.confirmPassword}>
+            <Input
+              {...fieldAria("reset-confirm", fieldErrors.confirmPassword)}
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              autoComplete="new-password"
+              required
+            />
+          </FormField>
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="outline" disabled={pending} onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={pending}>
+              {pending ? "Updating…" : "Update password"}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/** dev-only account recovery: issues a fresh temporary password. */
+export function RecoverAccountDialog({ userId, username }: { userId: number; username: string }) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const [password, setPassword] = useState<string | null>(null);
 
-  function handleReset() {
+  function handleRecover() {
     startTransition(async () => {
-      const result = await resetUserPassword(userId);
+      const result = await recoverAccount(userId);
       if (result.ok) {
         setPassword(result.data.tempPassword);
-        toast.success(`Password reset for ${username}`);
+        toast.success(`Recovery password issued for ${username}`);
       } else {
         toast.error(result.error);
       }
     });
   }
 
-  function handleOpenChange(next: boolean) {
-    setOpen(next);
-    if (!next) setPassword(null);
-  }
-
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger
-        className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-        aria-label={`Reset password for ${username}`}
-      >
-        <KeyRound aria-hidden data-icon="inline-start" />
-        Reset password
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) setPassword(null);
+      }}
+    >
+      <DialogTrigger className={cn(buttonVariants({ variant: "outline", size: "sm" }))} aria-label={`Recover account for ${username}`}>
+        <LifeBuoy aria-hidden data-icon="inline-start" />
+        Recover
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Reset password - {username}</DialogTitle>
+          <DialogTitle>Recover account — {username}</DialogTitle>
           <DialogDescription>
-            Generates a new temporary password. The old password stops working immediately.
+            Issues a new temporary password. The old password stops working immediately.
           </DialogDescription>
         </DialogHeader>
         {password ? (
           <div className="space-y-4">
             <TempPasswordPanel username={username} password={password} />
             <div className="flex justify-end">
-              <Button onClick={() => handleOpenChange(false)}>Done</Button>
+              <Button onClick={() => setOpen(false)}>Done</Button>
             </div>
           </div>
         ) : (
           <div className="flex justify-end gap-3">
-            <Button type="button" variant="outline" disabled={pending} onClick={() => handleOpenChange(false)}>
+            <Button type="button" variant="outline" disabled={pending} onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="button" disabled={pending} onClick={handleReset}>
-              {pending ? "Resetting…" : "Reset password"}
+            <Button type="button" disabled={pending} onClick={handleRecover}>
+              {pending ? "Issuing…" : "Issue recovery password"}
             </Button>
           </div>
         )}
