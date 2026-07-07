@@ -3,12 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireSession } from "@/lib/auth/guards";
+import { isSupabase } from "@/lib/db/source";
 import { recordActivity } from "@/lib/mock/activity";
 import { db, latency, nextId, nowIso } from "@/lib/mock/store";
+import * as catalogPg from "@/lib/services/products.pg";
 import type { CategoryInput } from "@/lib/types/catalog";
 import type { ActionResult } from "@/lib/types/common";
 
-// MOCK IMPLEMENTATION - replace store mutations with Supabase queries.
+// Validation + auth run here; data access dispatches to mock or Postgres
+// (lib/services/products.pg.ts) based on DATA_SOURCE.
 
 const categorySchema = z.object({
   categoryName: z.string().trim().min(3, "Name must be at least 3 characters").max(100),
@@ -23,7 +26,6 @@ function revalidateCategoryRoutes(): void {
 
 export async function createCategory(input: CategoryInput): Promise<ActionResult<{ id: number }>> {
   const session = await requireSession();
-  await latency();
   const parsed = categorySchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -32,6 +34,8 @@ export async function createCategory(input: CategoryInput): Promise<ActionResult
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
+  if (isSupabase) return catalogPg.createCategory(parsed.data, session);
+  await latency();
 
   const store = db();
   if (
@@ -56,7 +60,6 @@ export async function createCategory(input: CategoryInput): Promise<ActionResult
 
 export async function updateCategory(id: number, input: CategoryInput): Promise<ActionResult> {
   const session = await requireSession();
-  await latency();
   const parsed = categorySchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -65,6 +68,8 @@ export async function updateCategory(id: number, input: CategoryInput): Promise<
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
+  if (isSupabase) return catalogPg.updateCategory(id, parsed.data, session);
+  await latency();
 
   const store = db();
   const category = store.categories.find((c) => c.categoryId === id);
@@ -92,6 +97,7 @@ export async function updateCategory(id: number, input: CategoryInput): Promise<
 
 export async function deleteCategory(id: number): Promise<ActionResult> {
   const session = await requireSession();
+  if (isSupabase) return catalogPg.deleteCategory(id, session);
   await latency();
   const store = db();
   const category = store.categories.find((c) => c.categoryId === id);

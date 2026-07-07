@@ -3,12 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireSession } from "@/lib/auth/guards";
+import { isSupabase } from "@/lib/db/source";
 import { recordActivity } from "@/lib/mock/activity";
 import { db, latency, nextId, nowIso } from "@/lib/mock/store";
+import * as catalogPg from "@/lib/services/products.pg";
 import type { ProductInput } from "@/lib/types/catalog";
 import type { ActionResult } from "@/lib/types/common";
 
-// MOCK IMPLEMENTATION - replace store mutations with Supabase queries.
+// Validation + auth run here; data access dispatches to mock or Postgres
+// (lib/services/products.pg.ts) based on DATA_SOURCE.
 
 const productSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
@@ -53,9 +56,10 @@ function revalidateProductRoutes(): void {
 
 export async function createProduct(input: ProductInput): Promise<ActionResult<{ id: number }>> {
   const session = await requireSession();
-  await latency();
   const { data, failure } = validate(input);
   if (!data) return failure;
+  if (isSupabase) return catalogPg.createProduct(data, session);
+  await latency();
 
   const store = db();
   if (store.products.some((p) => p.slug.toLowerCase() === data.slug.toLowerCase())) {
@@ -93,9 +97,10 @@ export async function createProduct(input: ProductInput): Promise<ActionResult<{
 
 export async function updateProduct(id: number, input: ProductInput): Promise<ActionResult> {
   const session = await requireSession();
-  await latency();
   const { data, failure } = validate(input);
   if (!data) return failure;
+  if (isSupabase) return catalogPg.updateProduct(id, data, session);
+  await latency();
 
   const store = db();
   const product = store.products.find((p) => p.productId === id);
@@ -129,6 +134,7 @@ export async function updateProduct(id: number, input: ProductInput): Promise<Ac
 
 export async function deleteProduct(id: number): Promise<ActionResult> {
   const session = await requireSession();
+  if (isSupabase) return catalogPg.deleteProduct(id, session);
   await latency();
   const store = db();
   const product = store.products.find((p) => p.productId === id);
