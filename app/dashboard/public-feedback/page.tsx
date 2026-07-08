@@ -2,6 +2,7 @@ import { MessagesSquare } from "lucide-react";
 import type { Metadata } from "next";
 import { DataTablePagination } from "@/components/shared/DataTablePagination";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { ExportButton } from "@/components/shared/ExportButton";
 import { FilterSelect } from "@/components/shared/FilterSelect";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SearchInput } from "@/components/shared/SearchInput";
@@ -35,6 +36,7 @@ export default async function PublicFeedbackPage(
       <PageHeader
         title="Public feedback"
         description="Feedback submitted through the public feedback page."
+        actions={<ExportButton entity="public-feedback" searchParams={searchParams} />}
       />
 
       <div className="flex flex-wrap items-center justify-between gap-3">

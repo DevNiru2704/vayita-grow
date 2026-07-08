@@ -2,6 +2,7 @@ import { Inbox } from "lucide-react";
 import type { Metadata } from "next";
 import { DataTablePagination } from "@/components/shared/DataTablePagination";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { ExportButton } from "@/components/shared/ExportButton";
 import { FilterSelect } from "@/components/shared/FilterSelect";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SearchInput } from "@/components/shared/SearchInput";
@@ -36,6 +37,7 @@ export default async function ContactInquiriesPage(
       <PageHeader
         title="Contact inquiries"
         description="Messages submitted through the public contact form."
+        actions={<ExportButton entity="contact-inquiries" searchParams={searchParams} />}
       />
 
       <div className="flex flex-wrap items-center justify-between gap-3">

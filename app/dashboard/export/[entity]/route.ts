@@ -8,6 +8,7 @@ import { getCustomers } from "@/lib/services/customers";
 import { getDeliveries } from "@/lib/services/deliveries";
 import { getFeedbackTickets } from "@/lib/services/feedback";
 import { getFieldReports } from "@/lib/services/field-reports";
+import { getContactInquiries, getPublicFeedback } from "@/lib/services/inquiries";
 import { getInventory, getSuppliers } from "@/lib/services/inventory";
 import { getOrders } from "@/lib/services/orders";
 import { getCategories, getProducts } from "@/lib/services/products";
@@ -15,6 +16,10 @@ import { getQuotations } from "@/lib/services/quotations";
 import { getSettings } from "@/lib/services/settings";
 import { getStatements } from "@/lib/services/statements";
 import { getUsers } from "@/lib/services/users";
+import {
+  CONTACT_SUBJECT_LABELS,
+  PUBLIC_FEEDBACK_ROLE_LABELS,
+} from "@/lib/types/inquiries";
 import {
   ACTION_TYPES,
   CUSTOMER_STATUSES,
@@ -212,6 +217,34 @@ async function build(entity: string, sp: URLSearchParams): Promise<Response | nu
         { header: "Created", value: (r) => formatDate(r.createdAt) },
       ];
       return xlsxResponse("quotations.xlsx", "Quotations", cols, rows);
+    }
+    case "contact-inquiries": {
+      const rows = (
+        await getContactInquiries({ ...base(sp), subject: sp.get("subject") ?? undefined })
+      ).items;
+      const cols: ExportColumn<(typeof rows)[number]>[] = [
+        { header: "Name", value: (r) => r.name, width: 26 },
+        { header: "Organization", value: (r) => r.organization, width: 28 },
+        { header: "Subject", value: (r) => CONTACT_SUBJECT_LABELS[r.subject] ?? r.subject, width: 22 },
+        { header: "Phone", value: (r) => r.phone },
+        { header: "Email", value: (r) => r.email, width: 26 },
+        { header: "Message", value: (r) => r.message, width: 60 },
+        { header: "Received", value: (r) => formatDateTime(r.createdAt) },
+      ];
+      return xlsxResponse("contact-inquiries.xlsx", "Contact inquiries", cols, rows);
+    }
+    case "public-feedback": {
+      const rows = (
+        await getPublicFeedback({ ...base(sp), role: sp.get("role") ?? undefined })
+      ).items;
+      const cols: ExportColumn<(typeof rows)[number]>[] = [
+        { header: "Name", value: (r) => r.name, width: 26 },
+        { header: "Role", value: (r) => PUBLIC_FEEDBACK_ROLE_LABELS[r.role] ?? r.role },
+        { header: "Email", value: (r) => r.email, width: 26 },
+        { header: "Message", value: (r) => r.message, width: 60 },
+        { header: "Received", value: (r) => formatDateTime(r.createdAt) },
+      ];
+      return xlsxResponse("public-feedback.xlsx", "Public feedback", cols, rows);
     }
     case "settings": {
       const rows = await getSettings();
