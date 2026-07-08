@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { DataTablePagination } from "@/components/shared/DataTablePagination";
-import { FilterPills } from "@/components/shared/FilterPills";
+import { ExportButton } from "@/components/shared/ExportButton";
+import { FilterSelect } from "@/components/shared/FilterSelect";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SearchInput } from "@/components/shared/SearchInput";
 import { SortableHeader } from "@/components/shared/SortableHeader";
@@ -98,21 +99,24 @@ export default async function ClientsPage(props: PageProps<"/dashboard/clients">
       <PageHeader
         title="Clients"
         description="Dealers, distributors, retailers, and institutional buyers."
-        actions={<ClientDialog />}
+        actions={
+          <>
+            <ExportButton entity="clients" searchParams={searchParams} />
+            <ClientDialog />
+          </>
+        }
       />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-4">
-          <FilterPills
+        <div className="flex flex-wrap items-center gap-3">
+          <FilterSelect
+            label="Status"
             param="status"
-            pathname={PATH}
-            searchParams={searchParams}
             options={CUSTOMER_STATUSES.map((s) => ({ value: s, label: s }))}
           />
-          <FilterPills
+          <FilterSelect
+            label="State"
             param="state"
-            pathname={PATH}
-            searchParams={searchParams}
             allLabel="Both states"
             options={company.operatingStates.map((s) => ({ value: s, label: s }))}
           />

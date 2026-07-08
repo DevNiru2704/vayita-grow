@@ -2,7 +2,8 @@ import { MessageSquare } from "lucide-react";
 import type { Metadata } from "next";
 import { DataTablePagination } from "@/components/shared/DataTablePagination";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { FilterPills } from "@/components/shared/FilterPills";
+import { FilterSelect } from "@/components/shared/FilterSelect";
+import { ExportButton } from "@/components/shared/ExportButton";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { formatDateTime } from "@/lib/format";
@@ -32,13 +33,17 @@ export default async function FeedbackTicketsPage(props: PageProps<"/dashboard/f
       <PageHeader
         title="Feedback tickets"
         description="Internal operational feedback and requests from the team."
-        actions={<NewTicketDialog />}
+        actions={
+          <>
+            <ExportButton entity="feedback" searchParams={searchParams} />
+            <NewTicketDialog />
+          </>
+        }
       />
 
-      <FilterPills
+      <FilterSelect
+        label="Status"
         param="status"
-        pathname={PATH}
-        searchParams={searchParams}
         options={FEEDBACK_STATUSES.map((s) => ({ value: s, label: enumLabel(s) }))}
       />
 

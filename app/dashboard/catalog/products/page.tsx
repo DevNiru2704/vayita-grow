@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { DataTablePagination } from "@/components/shared/DataTablePagination";
+import { ExportButton } from "@/components/shared/ExportButton";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SearchInput } from "@/components/shared/SearchInput";
 import { SortableHeader } from "@/components/shared/SortableHeader";
@@ -106,10 +107,13 @@ export default async function ProductsCmsPage(props: PageProps<"/dashboard/catal
         title="Products"
         description="The product catalog CMS - changes publish to the public site immediately."
         actions={
-          <Link href="/dashboard/catalog/products/new" className={buttonVariants({ size: "lg" })}>
-            <Plus aria-hidden data-icon="inline-start" />
-            New product
-          </Link>
+          <>
+            <ExportButton entity="products" searchParams={searchParams} />
+            <Link href="/dashboard/catalog/products/new" className={buttonVariants({ size: "lg" })}>
+              <Plus aria-hidden data-icon="inline-start" />
+              New product
+            </Link>
+          </>
         }
       />
 

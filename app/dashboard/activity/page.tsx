@@ -2,7 +2,8 @@ import { Activity } from "lucide-react";
 import type { Metadata } from "next";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { DataTablePagination } from "@/components/shared/DataTablePagination";
-import { FilterPills } from "@/components/shared/FilterPills";
+import { FilterSelect } from "@/components/shared/FilterSelect";
+import { ExportButton } from "@/components/shared/ExportButton";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { formatDateTime } from "@/lib/format";
 import { getActivityLogs } from "@/lib/services/activity";
@@ -63,20 +64,19 @@ export default async function ActivityLogPage(props: PageProps<"/dashboard/activ
       <PageHeader
         title="Activity log"
         description="Audit trail of portal actions. Entries older than 30 days are purged automatically in the production design."
+        actions={<ExportButton entity="activity" searchParams={searchParams} />}
       />
 
-      <div className="flex flex-wrap gap-4">
-        <FilterPills
+      <div className="flex flex-wrap items-center gap-3">
+        <FilterSelect
+          label="Action"
           param="action"
-          pathname={PATH}
-          searchParams={searchParams}
           allLabel="All actions"
           options={ACTION_TYPES.map((a) => ({ value: a, label: a }))}
         />
-        <FilterPills
+        <FilterSelect
+          label="Entity"
           param="entity"
-          pathname={PATH}
-          searchParams={searchParams}
           allLabel="All entities"
           options={ENTITY_TYPES.map((e) => ({ value: e, label: e }))}
         />

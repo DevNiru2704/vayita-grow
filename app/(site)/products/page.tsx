@@ -1,6 +1,6 @@
 import { PackageSearch } from "lucide-react";
 import type { Metadata } from "next";
-import { FilterPills } from "@/components/shared/FilterPills";
+import { FilterSelect } from "@/components/shared/FilterSelect";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { MotionReveal } from "@/components/shared/MotionReveal";
 import { ProductCard } from "@/components/shared/ProductCard";
@@ -43,10 +43,9 @@ export default async function ProductsPage(props: PageProps<"/products">) {
 
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <nav aria-label="Filter by category" className="mb-10">
-          <FilterPills
+          <FilterSelect
+            label="Category"
             param="category"
-            pathname="/products"
-            searchParams={searchParams}
             allLabel="All categories"
             options={categories
               .filter((category) => category.productCount > 0)

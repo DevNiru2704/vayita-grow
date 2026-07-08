@@ -2,6 +2,7 @@ import { FileText } from "lucide-react";
 import type { Metadata } from "next";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { DataTablePagination } from "@/components/shared/DataTablePagination";
+import { ExportButton } from "@/components/shared/ExportButton";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SearchInput } from "@/components/shared/SearchInput";
 import { SortableHeader } from "@/components/shared/SortableHeader";
@@ -69,7 +70,12 @@ export default async function StatementsPage(props: PageProps<"/dashboard/statem
       <PageHeader
         title="Statements"
         description="Account statements uploaded for dealers and distributors."
-        actions={<StatementDialog customers={customers} />}
+        actions={
+          <>
+            <ExportButton entity="statements" searchParams={searchParams} />
+            <StatementDialog customers={customers} />
+          </>
+        }
       />
 
       <div className="flex justify-end">

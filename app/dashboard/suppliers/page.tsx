@@ -2,6 +2,7 @@ import { Boxes } from "lucide-react";
 import type { Metadata } from "next";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { DataTablePagination } from "@/components/shared/DataTablePagination";
+import { ExportButton } from "@/components/shared/ExportButton";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SearchInput } from "@/components/shared/SearchInput";
 import { getSuppliers } from "@/lib/services/inventory";
@@ -51,7 +52,12 @@ export default async function SuppliersPage(props: PageProps<"/dashboard/supplie
       <PageHeader
         title="Suppliers"
         description="Raw material and packaging suppliers referenced by inventory."
-        actions={<SupplierDialog />}
+        actions={
+          <>
+            <ExportButton entity="suppliers" searchParams={searchParams} />
+            <SupplierDialog />
+          </>
+        }
       />
       <div className="flex justify-end">
         <SearchInput placeholder="Search suppliers…" />

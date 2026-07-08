@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { DataTablePagination } from "@/components/shared/DataTablePagination";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { FilterPills } from "@/components/shared/FilterPills";
+import { FilterSelect } from "@/components/shared/FilterSelect";
+import { ExportButton } from "@/components/shared/ExportButton";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SearchInput } from "@/components/shared/SearchInput";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -39,14 +40,18 @@ export default async function FieldReportsPage(props: PageProps<"/dashboard/fiel
       <PageHeader
         title="Field reports"
         description="Dealer visits, demonstrations, and farmer meetings logged by the field team."
-        actions={<ReportDialog customers={customers} />}
+        actions={
+          <>
+            <ExportButton entity="field-reports" searchParams={searchParams} />
+            <ReportDialog customers={customers} />
+          </>
+        }
       />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <FilterPills
+        <FilterSelect
+          label="Status"
           param="status"
-          pathname={PATH}
-          searchParams={searchParams}
           options={FIELD_REPORT_STATUSES.map((s) => ({ value: s, label: enumLabel(s) }))}
         />
         <SearchInput placeholder="Search reports…" />

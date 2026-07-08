@@ -2,6 +2,7 @@ import { Layers } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
+import { ExportButton } from "@/components/shared/ExportButton";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { formatDate } from "@/lib/format";
 import { getCategories } from "@/lib/services/products";
@@ -70,7 +71,12 @@ export default async function CategoriesPage() {
       <PageHeader
         title="Categories"
         description="Product categories shown on the public site and used across the catalog."
-        actions={<CategoryDialog />}
+        actions={
+          <>
+            <ExportButton entity="categories" />
+            <CategoryDialog />
+          </>
+        }
       />
       <DataTable
         columns={columns}

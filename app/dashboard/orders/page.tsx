@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { DataTablePagination } from "@/components/shared/DataTablePagination";
-import { FilterPills } from "@/components/shared/FilterPills";
+import { FilterSelect } from "@/components/shared/FilterSelect";
+import { ExportButton } from "@/components/shared/ExportButton";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SearchInput } from "@/components/shared/SearchInput";
 import { SortableHeader } from "@/components/shared/SortableHeader";
@@ -93,18 +94,20 @@ export default async function OrdersPage(props: PageProps<"/dashboard/orders">) 
         title="Orders"
         description="Client orders across both operating states."
         actions={
-          <Link href="/dashboard/orders/new" className={buttonVariants({ size: "lg" })}>
-            <Plus aria-hidden data-icon="inline-start" />
-            New order
-          </Link>
+          <>
+            <ExportButton entity="orders" searchParams={searchParams} />
+            <Link href="/dashboard/orders/new" className={buttonVariants({ size: "lg" })}>
+              <Plus aria-hidden data-icon="inline-start" />
+              New order
+            </Link>
+          </>
         }
       />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <FilterPills
+        <FilterSelect
+          label="Status"
           param="status"
-          pathname={PATH}
-          searchParams={searchParams}
           options={ORDER_STATUSES.map((s) => ({ value: s, label: s }))}
         />
         <SearchInput placeholder="Search orders…" />

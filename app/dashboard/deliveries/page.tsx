@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { DataTablePagination } from "@/components/shared/DataTablePagination";
-import { FilterPills } from "@/components/shared/FilterPills";
+import { FilterSelect } from "@/components/shared/FilterSelect";
+import { ExportButton } from "@/components/shared/ExportButton";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SearchInput } from "@/components/shared/SearchInput";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -82,13 +83,13 @@ export default async function DeliveriesPage(props: PageProps<"/dashboard/delive
       <PageHeader
         title="Deliveries"
         description="Shipments created from orders, with courier and transit tracking."
+        actions={<ExportButton entity="deliveries" searchParams={searchParams} />}
       />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <FilterPills
+        <FilterSelect
+          label="Status"
           param="status"
-          pathname={PATH}
-          searchParams={searchParams}
           options={DELIVERY_STATUSES.map((s) => ({ value: s, label: enumLabel(s) }))}
         />
         <SearchInput placeholder="Search deliveries…" />

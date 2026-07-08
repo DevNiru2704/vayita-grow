@@ -2,7 +2,8 @@ import { Warehouse } from "lucide-react";
 import type { Metadata } from "next";
 import { DataTable, type DataTableColumn } from "@/components/shared/DataTable";
 import { DataTablePagination } from "@/components/shared/DataTablePagination";
-import { FilterPills } from "@/components/shared/FilterPills";
+import { FilterSelect } from "@/components/shared/FilterSelect";
+import { ExportButton } from "@/components/shared/ExportButton";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SearchInput } from "@/components/shared/SearchInput";
 import { SortableHeader } from "@/components/shared/SortableHeader";
@@ -102,13 +103,13 @@ export default async function InventoryPage(props: PageProps<"/dashboard/invento
       <PageHeader
         title="Inventory"
         description={`Stock levels per product. Items at or below ${threshold} units are flagged as low.`}
+        actions={<ExportButton entity="inventory" searchParams={searchParams} />}
       />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <FilterPills
+        <FilterSelect
+          label="Stock"
           param="low"
-          pathname={PATH}
-          searchParams={searchParams}
           allLabel="All stock"
           options={[{ value: "1", label: "Low stock only" }]}
         />

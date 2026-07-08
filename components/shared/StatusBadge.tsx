@@ -33,16 +33,19 @@ const TONE_BY_STATUS: Record<string, Tone> = {
   Completed: "success",
   Active: "success",
   Resolved: "success",
+  Accepted: "success",
   // warning
   Pending: "warning",
   Follow_Up_Required: "warning",
   Open: "warning",
+  Expired: "warning",
   // danger
   Cancelled: "danger",
   Failed: "danger",
   Returned: "danger",
   Refunded: "danger",
   Inactive: "danger",
+  Rejected: "danger",
   // info
   Processing: "info",
   Shipped: "info",
@@ -50,8 +53,10 @@ const TONE_BY_STATUS: Record<string, Tone> = {
   In_Transit: "info",
   In_Progress: "info",
   New: "info",
+  Sent: "info",
   // neutral
   Closed: "neutral",
+  Draft: "neutral",
 };
 
 export function StatusBadge({ status, className }: { status: string; className?: string }) {
