@@ -9,6 +9,7 @@ import { FormField, fieldAria } from "@/components/shared/FormField";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { uploadProductImage } from "@/lib/actions/media";
 import { createProduct, updateProduct } from "@/lib/actions/products";
 import type { ProductInput, ProductWithDetails } from "@/lib/types/catalog";
 
@@ -71,6 +72,7 @@ export function ProductForm({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [uploading, setUploading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [values, setValues] = useState<FormValues>({
     name: product?.name ?? "",
@@ -90,6 +92,24 @@ export function ProductForm({
 
   function update<K extends keyof FormValues>(key: K, value: FormValues[K]) {
     setValues((prev) => ({ ...prev, [key]: value }));
+  }
+
+  async function handleUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("file", file);
+    setUploading(true);
+    const result = await uploadProductImage(formData);
+    setUploading(false);
+    event.target.value = "";
+    if (!result.ok) {
+      toast.error(result.error);
+      return;
+    }
+    // Use the Cloudinary URL for both the cutout (card/hero) and full photo.
+    setValues((prev) => ({ ...prev, imageCutoutUrl: result.data.url, imageUrl: result.data.url }));
+    toast.success("Image uploaded to Cloudinary");
   }
 
   function handleSubmit(event: React.FormEvent) {
@@ -317,10 +337,24 @@ export function ProductForm({
                 />
               </div>
             ) : null}
-            <p className="rounded-lg border border-dashed bg-muted/50 p-3 text-xs text-muted-foreground">
-              Direct image upload arrives with the backend phase (Cloudinary per the database
-              design). For now, choose from the photo library.
-            </p>
+            <div className="space-y-2 rounded-lg border border-dashed bg-muted/50 p-3">
+              <label htmlFor="p-upload" className="text-xs font-medium">
+                Upload a new image (Cloudinary)
+              </label>
+              <input
+                id="p-upload"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                disabled={uploading}
+                onChange={handleUpload}
+                className="block w-full text-xs text-muted-foreground file:mr-3 file:rounded-md file:border file:border-input file:bg-background file:px-3 file:py-1.5 file:text-xs file:font-medium hover:file:bg-muted"
+              />
+              <p className="text-xs text-muted-foreground">
+                {uploading
+                  ? "Uploading…"
+                  : "PNG, JPG, or WebP up to 5 MB. Or pick from the library above."}
+              </p>
+            </div>
           </div>
         </div>
 
