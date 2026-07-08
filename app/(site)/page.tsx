@@ -1,6 +1,6 @@
 import { ArrowRight, Handshake, MapPin } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import { HeroSlideshow } from "@/components/shared/HeroSlideshow";
 import { MotionReveal } from "@/components/shared/MotionReveal";
 import { ProductCard } from "@/components/shared/ProductCard";
 import { SectionHeading } from "@/components/shared/SectionHeading";
@@ -25,7 +25,13 @@ export default async function HomePage() {
     console.error("Homepage catalog load failed; rendering without catalog:", error);
   }
   const featured = products.slice(0, 4);
-  const heroProduct = products.find((p) => p.slug === "VEER-L") ?? products[0];
+  const heroSlides = products
+    .filter((p) => p.details.imageCutoutUrl)
+    .map((p) => ({
+      src: p.details.imageCutoutUrl as string,
+      name: p.name,
+      categoryName: p.categoryName,
+    }));
 
   // Only verifiable facts - no invented statistics.
   const facts = [
@@ -83,21 +89,9 @@ export default async function HomePage() {
             </MotionReveal>
           </div>
 
-          {heroProduct?.details.imageCutoutUrl ? (
+          {heroSlides.length > 0 ? (
             <MotionReveal delay={0.2} className="hidden lg:block">
-              <div className="relative mx-auto flex h-105 w-full max-w-md items-center justify-center rounded-3xl border border-white/10 bg-white/5 p-8">
-                <Image
-                  src={heroProduct.details.imageCutoutUrl}
-                  alt={`${heroProduct.name} product pack`}
-                  fill
-                  priority
-                  className="object-contain p-10 drop-shadow-2xl"
-                  sizes="(max-width: 1024px) 0px, 28rem"
-                />
-                <p className="absolute bottom-5 left-1/2 -translate-x-1/2 rounded-full bg-brand-900/80 px-4 py-1.5 text-xs font-medium tracking-wide text-brand-200">
-                  {heroProduct.name} · {heroProduct.categoryName}
-                </p>
-              </div>
+              <HeroSlideshow slides={heroSlides} />
             </MotionReveal>
           ) : null}
         </div>
