@@ -36,6 +36,7 @@ export function ContactForm({
     email: "",
     subject: validSubject,
     message: productName ? `I would like to know more about ${productName}. ` : "",
+    website: "",
   });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [submitted, setSubmitted] = useState(false);
@@ -90,6 +91,21 @@ export function ContactForm({
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-5">
+      {/* Honeypot: hidden from users; bots that fill it are silently dropped. */}
+      <div aria-hidden className="hidden">
+        <label>
+          Website
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            value={values.website ?? ""}
+            onChange={(e) => update("website", e.target.value)}
+          />
+        </label>
+      </div>
+
       <div className="grid gap-5 sm:grid-cols-2">
         <FormField id="contact-name" label="Full name" errors={fieldErrors.name}>
           <Input

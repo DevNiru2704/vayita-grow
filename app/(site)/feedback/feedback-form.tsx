@@ -25,6 +25,7 @@ export function FeedbackForm() {
     organization: "",
     role: "dealer",
     message: "",
+    website: "",
   });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [submitted, setSubmitted] = useState(false);
@@ -73,6 +74,21 @@ export function FeedbackForm() {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-5">
+      {/* Honeypot: hidden from users; bots that fill it are silently dropped. */}
+      <div aria-hidden className="hidden">
+        <label>
+          Website
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            value={values.website ?? ""}
+            onChange={(e) => update("website", e.target.value)}
+          />
+        </label>
+      </div>
+
       <div className="grid gap-5 sm:grid-cols-2">
         <FormField id="feedback-name" label="Your name" errors={fieldErrors.name}>
           <Input
