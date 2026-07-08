@@ -11,8 +11,19 @@ import { categoryIcons, DEFAULT_CATEGORY_ICON, whyChooseUs } from "@/lib/config/
 import { getCategories, getPublicProducts } from "@/lib/services/products";
 import { cn } from "@/lib/utils";
 
+// ISR: the homepage is statically served and refreshed hourly, so normal page
+// loads never hit the database. The fetch is wrapped so a database outage
+// degrades to an empty catalog instead of failing the build/render.
+export const revalidate = 3600;
+
 export default async function HomePage() {
-  const [products, categories] = await Promise.all([getPublicProducts(), getCategories()]);
+  let products: Awaited<ReturnType<typeof getPublicProducts>> = [];
+  let categories: Awaited<ReturnType<typeof getCategories>> = [];
+  try {
+    [products, categories] = await Promise.all([getPublicProducts(), getCategories()]);
+  } catch (error) {
+    console.error("Homepage catalog load failed; rendering without catalog:", error);
+  }
   const featured = products.slice(0, 4);
   const heroProduct = products.find((p) => p.slug === "VEER-L") ?? products[0];
 

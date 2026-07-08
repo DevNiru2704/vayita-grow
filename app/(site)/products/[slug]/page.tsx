@@ -5,12 +5,17 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MotionReveal } from "@/components/shared/MotionReveal";
 import { buttonVariants } from "@/components/ui/button";
-import { getProductBySlug, getPublicProducts } from "@/lib/services/products";
+import { getProductBySlug } from "@/lib/services/products";
 import { cn } from "@/lib/utils";
 
-export async function generateStaticParams() {
-  const products = await getPublicProducts();
-  return products.map((product) => ({ slug: product.slug }));
+// Product pages are generated on first request and then cached (ISR), so the
+// build never queries the database. `dynamicParams` lets any valid slug render
+// on demand; unknown slugs fall through to notFound().
+export const dynamicParams = true;
+export const revalidate = 3600;
+
+export function generateStaticParams() {
+  return [];
 }
 
 export async function generateMetadata(
