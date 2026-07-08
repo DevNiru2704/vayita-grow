@@ -3,10 +3,12 @@ import {
   Boxes,
   ClipboardList,
   FileText,
+  Inbox,
   Layers,
   LayoutDashboard,
   LucideIcon,
   MessageSquare,
+  MessagesSquare,
   Package,
   ReceiptText,
   Settings,
@@ -76,6 +78,8 @@ export const dashboardNav: DashboardNavGroup[] = [
   {
     label: "System",
     links: [
+      { label: "Contact Inquiries", href: "/dashboard/contact-inquiries", icon: Inbox },
+      { label: "Public Feedback", href: "/dashboard/public-feedback", icon: MessagesSquare },
       { label: "Feedback", href: "/dashboard/feedback", icon: MessageSquare },
       { label: "Activity Log", href: "/dashboard/activity", icon: Activity },
       { label: "Users", href: "/dashboard/users", icon: UserCog, roles: ADMIN_ROLES },

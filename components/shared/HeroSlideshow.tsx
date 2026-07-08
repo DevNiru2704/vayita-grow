@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * Hero product slideshow: crossfades through the catalog in a random order.
@@ -30,15 +30,18 @@ export function HeroSlideshow({
   intervalMs?: number;
 }) {
   const reduce = useReducedMotion();
-  // Randomise once per mount so each page load leads with a different product.
-  const order = useMemo(() => shuffle(slides), [slides]);
+  // Deterministic order for SSR + first client paint (avoids a hydration
+  // mismatch); the randomised order and rotation kick in after mount.
+  const [order, setOrder] = useState<HeroSlide[]>(slides);
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    if (reduce || order.length <= 1) return;
-    const id = setInterval(() => setIndex((i) => (i + 1) % order.length), intervalMs);
+    if (reduce || slides.length <= 1) return;
+    setOrder(shuffle(slides));
+    setIndex(0);
+    const id = setInterval(() => setIndex((i) => (i + 1) % slides.length), intervalMs);
     return () => clearInterval(id);
-  }, [reduce, order.length, intervalMs]);
+  }, [reduce, slides, intervalMs]);
 
   if (order.length === 0) return null;
   const current = order[index];
