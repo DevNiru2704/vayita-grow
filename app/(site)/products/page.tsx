@@ -26,6 +26,13 @@ export default async function ProductsPage(props: PageProps<"/products">) {
     ? categories.find((c) => c.categoryId === categoryId)
     : undefined;
 
+  const categoryOptions = categories
+    .filter((category) => category.productCount > 1)
+    .map((category) => ({
+      value: String(category.categoryId),
+      label: category.categoryName,
+    }));
+
   return (
     <>
       <section className="border-b bg-brand-50">
@@ -42,20 +49,17 @@ export default async function ProductsPage(props: PageProps<"/products">) {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-        <nav aria-label="Filter by category" className="mb-10">
-          <FilterPills
-            param="category"
-            pathname="/products"
-            searchParams={searchParams}
-            allLabel="All categories"
-            options={categories
-              .filter((category) => category.productCount > 0)
-              .map((category) => ({
-                value: String(category.categoryId),
-                label: category.categoryName,
-              }))}
-          />
-        </nav>
+        {(categoryOptions.length > 0 || categoryId) && (
+          <nav aria-label="Filter by category" className="mb-10">
+            <FilterPills
+              param="category"
+              pathname="/products"
+              searchParams={searchParams}
+              allLabel="All categories"
+              options={categoryOptions}
+            />
+          </nav>
+        )}
 
         {products.length === 0 ? (
           <EmptyState
