@@ -12,7 +12,7 @@
 Enum role_name_enum {
 dev
 admin
-sub_admin
+staff
 }
 
 Enum order_status {
@@ -373,4 +373,92 @@ Ref: deliveries.order_id > orders.order_id
 Ref: delivery_updates.delivery_id > deliveries.delivery_id
 Ref: feedback.user_id > users.user_id
 Ref: activity_logs.user_id > users.user_id
+```
+
+## EXTENSION schema (implemented, not in v1.2.0)
+
+Added during the backend build (`supabase/migrations/0005_extensions.sql`,
+`0007_quotations.sql`). The `entity_type` enum gains `QUOTATION`; `role_name_enum`
+uses `staff` (renamed from `sub_admin`).
+
+```dbml
+Enum field_report_status { Completed Follow_Up_Required }
+Enum customer_status { Active Inactive New }
+Enum quotation_status { Draft Sent Accepted Rejected Expired }
+
+// customers gains: state varchar, status customer_status
+// products gains:  slug varchar [unique]
+
+Table product_details {
+  product_id integer [pk] // FK products
+  short_description text
+  benefits text[]
+  dosage text
+  composition text
+  pack_sizes text[]
+  image_cutout_url varchar(500) // Cloudinary
+}
+
+Table statements {
+  statement_id integer [pk, increment]
+  statement_number varchar(50) [unique, not null]
+  customer_id integer [not null]  // FK customers
+  period_label varchar(100) [not null]
+  upload_date timestamp
+  uploaded_by integer [not null]  // FK users
+}
+
+Table field_reports {
+  report_id integer [pk, increment]
+  visit_date date [not null]
+  customer_id integer            // FK customers (nullable)
+  dealer_name varchar(150) [not null]
+  location varchar(255) [not null]
+  summary text [not null]
+  status field_report_status [not null]
+  created_by integer [not null]  // FK users
+  created_at timestamp
+}
+
+Table quotations {
+  quotation_id integer [pk, increment]
+  quotation_number varchar(50) [unique, not null]
+  customer_id integer [not null]       // FK customers
+  created_by integer [not null]        // FK users
+  assigned_staff_id integer            // FK users (nullable)
+  status quotation_status [not null, default: 'Draft']
+  total_amount decimal(12,2) [not null]
+  valid_until date
+  notes text
+  created_at timestamp
+}
+
+Table quotation_items {
+  item_id integer [pk, increment]
+  quotation_id integer [not null]  // FK quotations
+  product_id integer [not null]    // FK products
+  quantity integer [not null]
+  unit_price decimal(10,2) [not null]
+}
+
+// Public form persistence
+Table contact_inquiries {
+  inquiry_id integer [pk, increment]
+  name varchar(150) [not null]
+  organization varchar(150)
+  phone varchar(20) [not null]
+  email varchar(255)
+  subject varchar(40) [not null]
+  message text [not null]
+  created_at timestamp
+}
+
+Table public_feedback {
+  feedback_id integer [pk, increment]
+  name varchar(150) [not null]
+  role varchar(40) [not null]
+  email varchar(255)
+  message text [not null]
+  created_at timestamp
+}
 ```

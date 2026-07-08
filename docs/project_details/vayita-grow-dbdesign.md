@@ -124,7 +124,7 @@ Purpose: Stores user roles available within the system to enforce Role-Based Acc
 Field Name Data Type Constraints Description
 role_id SERIAL Primary Key Unique Role Identifier
 role_name role_name_enum Unique, Not Null ENUM: dev, admin,
-sub_admin
+staff
 created_at TIMESTAMP Default NOW() Creation Timestamp
 1.2. Users Table
 Purpose: Stores staff account information, authentication data, and hierarchical creation

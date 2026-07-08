@@ -136,3 +136,20 @@ Components adapt, not shrink: tables gain horizontal-scroll containers on small 
 - Only verifiable facts on the public site: 2 operating states (West Bengal, Jharkhand), 10 products, real category count. No invented testimonials, statistics, certifications, or people.
 - Placeholder contact details live only in `lib/config/company.ts`, clearly marked, pending client delivery.
 - Currency: INR, formatted `₹1,23,456` via `Intl.NumberFormat("en-IN")` - dashboard only (public site shows no prices; inquiry-based B2B).
+
+## 12. Backend-phase component additions
+
+- **Filters:** `FilterSelect` (compact, URL-driven dropdown) replaced the old
+  filter-pill rows everywhere (all dashboard lists + public products) — scales
+  to many options and keeps toolbars tight.
+- **Charts:** `DashboardCharts` (Recharts) with a chart-type dropdown that shows
+  only the selected chart + a "Export PDF" (SVG-rasterized, not html2canvas —
+  Tailwind v4 oklch is not rasterizable). Chart internals use hex literals that
+  mirror the `--chart-*` tokens so PDF and screen match.
+- **Exports:** every list page has an outline "Export" button (server-side
+  `.xlsx`); the quotation detail has a branded "Export PDF" (logo + jsPDF).
+- **Auth UI:** Settings hosts the change-password card and the 2FA
+  enable/disable card; the Users page exposes role-gated create/reset/recover
+  dialogs. Password inputs follow the standard `FormField` pattern.
+- All new controls use the existing tokens, `Button`/`Input`/`Dialog` primitives,
+  lucide icons, and light-theme-only styling.

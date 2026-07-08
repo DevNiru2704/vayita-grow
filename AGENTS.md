@@ -54,6 +54,43 @@ The documentation—not the existing implementation—is the authoritative sourc
 
 ---
 
+# Current Backend State (implemented)
+
+The project is **no longer frontend-only**. A production-shaped backend has been
+implemented behind the existing service/action seams. Key facts an agent must
+know before touching data, auth, or infra:
+
+- **Data source switch:** `DATA_SOURCE=mock` (default, in-memory demo, zero
+  infra) or `DATA_SOURCE=supabase` (Postgres). Every domain has
+  `lib/services/<domain>.{mock,pg}.ts` behind a dispatcher; actions validate +
+  auth-check, then dispatch by source. Preserve this pattern.
+- **Database:** PostgreSQL (Supabase), accessed via `node-postgres` (`lib/db/`)
+  with hand-written **parameterized** SQL. Schema lives in
+  `supabase/migrations/*.sql`; reference/demo data in `supabase/seed.sql` +
+  `scripts/seed.ts`. Never string-build SQL; `?sort=` is whitelisted.
+- **Auth:** JWT cookie sessions (`jose`) + **Argon2** hashing + Google
+  Authenticator **2FA** (TOTP challenge token, 5-min) + token blacklist, all in
+  `lib/auth/`. Roles: `dev`, `admin`, `staff` (renamed from `sub_admin`).
+  Password RBAC matrix is enforced in `lib/actions/{users,account}.ts`.
+- **Integrations:** Resend (`lib/email/`) for contact/feedback email;
+  Cloudinary (`lib/media/`) for product images (`res.cloudinary.com` allowed in
+  `next.config.ts`). Both degrade gracefully without keys.
+- **Features added:** Quotations module (`app/dashboard/quotations`), Excel
+  exports (`app/dashboard/export/[entity]`), dashboard charts + PDF, quotation
+  PDF, the `FilterSelect` filter UI.
+- **Env:** see `.env.example`. `JWT_SECRET` is required in supabase mode.
+- **Security:** CSP + headers in `next.config.ts`; see
+  `docs/guidelines/guidelines4-security.md`.
+- **Commands:** `npm run dev` / `build`; migrate with
+  `psql "$DATABASE_URL" -f supabase/migrations/000X_*.sql`; seed with
+  `npx tsx scripts/seed.ts`.
+
+The rest of this document (workflow, design constitution, guidelines) still
+applies. `docs/project_details/frontend_architecture.md` is the best living map
+of the layered architecture.
+
+---
+
 # Current Development Goal
 
 The objective is to transform the prototype into a production-quality application.

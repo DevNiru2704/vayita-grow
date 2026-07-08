@@ -1,8 +1,34 @@
-# Frontend Architecture (post-transformation)
+# Architecture (full-stack)
 
-State as of July 2026, after the production-quality frontend remake. The UI is
-complete over an in-memory mock data layer; the backend phase swaps the layer's
-internals without touching pages or components.
+State as of July 2026. The production-quality UI sits over a **dual data
+source**: an in-memory mock layer (default, zero-infra demo) and a real
+PostgreSQL backend, selected by `DATA_SOURCE=mock|supabase`. Pages and
+components are unchanged across sources — only the data layer differs.
+
+## Data source seam (`DATA_SOURCE`)
+
+Each domain has `lib/services/<domain>.mock.ts` (in-memory) and
+`<domain>.pg.ts` (parameterized SQL via `lib/db/`), re-exported by a thin
+`<domain>.ts` dispatcher. Server actions in `lib/actions/*` run auth + Zod
+validation once, then dispatch to the mock body or the `.pg` writer by source.
+`lib/db/`: `source.ts` (the flag), `pool.ts` (pg pool + type parsers),
+`query.ts` (`query`/`queryOne`/`withActor`), `list.ts` (SQL filter/sort/
+paginate, sort-key whitelisted). Schema: `supabase/migrations/*.sql`; seed:
+`supabase/seed.sql` + `scripts/seed.ts`.
+
+## Auth (real)
+
+`lib/auth/`: JWT cookie sessions (`jose`), Argon2 passwords, Google
+Authenticator 2FA (TOTP challenge token, 5-min, single-use), token blacklist,
+role matrix (`dev`/`admin`/`staff`). `proxy.ts` stays optimistic; the dashboard
+layout + every action are authoritative. Rate limiting in `lib/security/`.
+
+## Integrations & added modules
+
+Resend (`lib/email/`), Cloudinary (`lib/media/`), Quotations module, Excel
+exports (`app/dashboard/export/[entity]`), dashboard charts + PDF, quotation
+PDF, `FilterSelect` filters, self-service password change + admin resets. See
+`docs/guidelines/guidelines4-security.md` for the security posture.
 
 ## Layers
 
