@@ -66,18 +66,17 @@ export default async function ProductDetailPage(props: PageProps<"/products/[slu
       <article className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <MotionReveal>
-            <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-2xl border bg-brand-50">
-              {product.details.imageCutoutUrl ? (
-                <Image
-                  src={product.details.imageCutoutUrl}
-                  alt={`${product.name} product pack`}
-                  fill
-                  priority
-                  className="object-contain p-10"
-                  sizes="(max-width: 1024px) 100vw, 45vw"
-                />
-              ) : null}
-            </div>
+            {product.imageUrl ? (
+              <Image
+                src={product.imageUrl}
+                alt={`${product.name} product pack`}
+                width={0}
+                height={0}
+                sizes="(max-width: 1024px) 100vw, 45vw"
+                priority
+                className="h-auto w-full rounded-2xl border"
+              />
+            ) : null}
           </MotionReveal>
 
           <div className="space-y-8">
