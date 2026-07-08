@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+// Fix: Change 'motion/react' to 'framer-motion'
+import { motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 
 /**
