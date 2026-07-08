@@ -10,7 +10,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatCard } from "@/components/shared/StatCard";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { RevenueTrendChart } from "@/components/dashboard/charts/RevenueTrendChart";
+import { DashboardCharts } from "@/components/dashboard/charts/DashboardCharts";
 import { getSession } from "@/lib/auth/session";
 import { formatINR, formatNumber, formatDate } from "@/lib/format";
 import {
@@ -34,7 +34,10 @@ export default async function DashboardOverviewPage() {
     getLowStockItems(5),
   ]);
 
-  const totalOrders = ORDER_STATUSES.reduce((sum, s) => sum + orderStats.byStatus[s], 0);
+  const statusData = ORDER_STATUSES.map((status) => ({
+    status,
+    count: orderStats.byStatus[status],
+  }));
 
   return (
     <div className="space-y-6">
@@ -55,57 +58,7 @@ export default async function DashboardOverviewPage() {
         ))}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <section
-          aria-labelledby="revenue-heading"
-          className="rounded-xl border bg-card p-5 lg:col-span-2"
-        >
-          <div className="mb-4 flex items-baseline justify-between gap-4">
-            <div>
-              <h2 id="revenue-heading" className="font-sans text-base font-semibold">
-                Order revenue - last 6 months
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Revenue this month: {formatINR(orderStats.revenueMTD)}
-              </p>
-            </div>
-          </div>
-          <RevenueTrendChart data={series} />
-        </section>
-
-        <section aria-labelledby="status-heading" className="rounded-xl border bg-card p-5">
-          <h2 id="status-heading" className="font-sans text-base font-semibold">
-            Orders by status
-          </h2>
-          <p className="mb-5 text-sm text-muted-foreground">
-            {formatNumber(totalOrders)} orders total
-          </p>
-          <ul className="space-y-4">
-            {ORDER_STATUSES.map((status) => {
-              const count = orderStats.byStatus[status];
-              const share = totalOrders === 0 ? 0 : Math.round((count / totalOrders) * 100);
-              return (
-                <li key={status}>
-                  <div className="mb-1.5 flex items-center justify-between gap-2">
-                    <StatusBadge status={status} />
-                    <span className="text-sm font-medium">{formatNumber(count)}</span>
-                  </div>
-                  <div
-                    role="img"
-                    aria-label={`${status}: ${count} orders (${share}%)`}
-                    className="h-1.5 overflow-hidden rounded-full bg-muted"
-                  >
-                    <div
-                      className="h-full rounded-full bg-brand-500"
-                      style={{ width: `${share}%` }}
-                    />
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      </div>
+      <DashboardCharts series={series} status={statusData} />
 
       <div className="grid gap-4 lg:grid-cols-3">
         <section
