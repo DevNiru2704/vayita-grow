@@ -28,7 +28,10 @@ declare global {
 export function pool(): Pool {
   globalThis.__vayitaPgPool ??= new Pool({
     connectionString: process.env.DATABASE_URL,
-    max: Number(process.env.PG_POOL_MAX ?? 10),
+    // Small by default: Supabase poolers cap concurrent clients (session mode
+    // is ~15), and a build prerenders several DB routes at once. Serverless
+    // runtimes also favour tiny per-instance pools.
+    max: Number(process.env.PG_POOL_MAX ?? 3),
     idleTimeoutMillis: 30_000,
     // Supabase requires TLS; allow the pooled cert chain without a local CA file.
     ssl: process.env.PG_SSL === "disable" ? undefined : { rejectUnauthorized: false },
