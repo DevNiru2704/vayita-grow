@@ -91,6 +91,31 @@ const CHART_TYPES = [
 ] as const;
 type ChartId = (typeof CHART_TYPES)[number]["id"];
 
+/** The exact values a chart's hover tooltip reveals, as a table for the PDF. */
+function chartTableData(
+  id: ChartId,
+  series: MonthlyOrderPoint[],
+  status: StatusDatum[],
+): { head: string[]; body: string[][] } {
+  switch (id) {
+    case "revenue-area":
+      return {
+        head: ["Month", "Revenue", "Orders"],
+        body: series.map((p) => [p.month, formatINR(p.revenue), formatNumber(p.orders)]),
+      };
+    case "orders-bar":
+      return {
+        head: ["Month", "Orders"],
+        body: series.map((p) => [p.month, formatNumber(p.orders)]),
+      };
+    default: // status-bar, status-pie
+      return {
+        head: ["Status", "Orders"],
+        body: status.map((s) => [s.status, formatNumber(s.count)]),
+      };
+  }
+}
+
 const axisTick = { fill: C.axis, fontSize: 12 } as const;
 
 function TooltipBox({ rows }: { rows: { label: string; value: string }[] }) {
@@ -230,10 +255,13 @@ export function DashboardCharts({
     if (!exportRef.current) return;
     setExporting(true);
     try {
-      const { jsPDF } = await import("jspdf");
+      const [{ jsPDF }, autoTableModule] = await Promise.all([
+        import("jspdf"),
+        import("jspdf-autotable"),
+      ]);
+      const autoTable = autoTableModule.default;
       const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
       const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
       const cards = Array.from(exportRef.current.querySelectorAll<HTMLElement>("[data-chart-card]"));
 
       let rendered = 0;
@@ -251,9 +279,31 @@ export function DashboardCharts({
         doc.setTextColor(150, 158, 153);
         doc.text("VayitaGrow — Dashboard analytics", 40, 58);
 
-        const w = pageWidth - 80;
-        const h = w / ratio;
-        doc.addImage(dataUrl, "PNG", 40, 72, w, Math.min(h, pageHeight - 100));
+        // Chart image (height-capped to leave room for the data table).
+        let w = pageWidth - 80;
+        let h = w / ratio;
+        const maxImgH = 290;
+        if (h > maxImgH) {
+          h = maxImgH;
+          w = h * ratio;
+        }
+        const x = (pageWidth - w) / 2;
+        doc.addImage(dataUrl, "PNG", x, 72, w, h);
+
+        // The hover values, printed as a table so the PDF is self-explanatory.
+        const { head, body } = chartTableData(CHART_TYPES[i].id, series, status);
+        doc.setFontSize(9);
+        doc.setTextColor(120, 128, 123);
+        doc.text("Values shown on hover", 40, 72 + h + 22);
+        autoTable(doc, {
+          startY: 72 + h + 30,
+          head: [head],
+          body,
+          theme: "striped",
+          styles: { fontSize: 9, cellPadding: 4 },
+          headStyles: { fillColor: [20, 131, 59], textColor: 255 },
+          margin: { left: 40, right: 40 },
+        });
       }
       doc.save("dashboard-charts.pdf");
     } catch (err) {
