@@ -119,7 +119,6 @@ export function ContactForm({
         <FormField
           id="contact-org"
           label="Business / organization"
-          optional
           errors={fieldErrors.organization}
         >
           <Input
@@ -127,6 +126,7 @@ export function ContactForm({
             value={values.organization}
             onChange={(e) => update("organization", e.target.value)}
             autoComplete="organization"
+            required
           />
         </FormField>
       </div>
@@ -142,13 +142,14 @@ export function ContactForm({
             required
           />
         </FormField>
-        <FormField id="contact-email" label="Email" optional errors={fieldErrors.email}>
+        <FormField id="contact-email" label="Email" errors={fieldErrors.email}>
           <Input
             {...fieldAria("contact-email", fieldErrors.email)}
             type="email"
             value={values.email}
             onChange={(e) => update("email", e.target.value)}
             autoComplete="email"
+            required
           />
         </FormField>
       </div>

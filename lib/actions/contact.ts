@@ -22,12 +22,20 @@ async function clientIp(): Promise<string> {
 
 const inquirySchema = z.object({
   name: z.string().trim().min(2, "Please enter your full name"),
-  organization: z.string().trim().max(150).optional().or(z.literal("")),
+  organization: z
+    .string()
+    .trim()
+    .min(2, "Please enter your business or organization")
+    .max(150),
   phone: z
     .string()
     .trim()
     .regex(/^[+\d][\d\s-]{7,17}$/, "Please enter a valid phone number"),
-  email: z.string().trim().email("Please enter a valid email address").or(z.literal("")),
+  email: z
+    .string()
+    .trim()
+    .min(1, "Please enter your email address")
+    .email("Please enter a valid email address"),
   subject: z.enum(["dealership", "order", "product", "other"]),
   message: z.string().trim().min(10, "Please describe your inquiry (at least 10 characters)"),
   website: z.string().optional(), // honeypot
