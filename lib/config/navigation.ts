@@ -8,6 +8,7 @@ import {
   LucideIcon,
   MessageSquare,
   Package,
+  ReceiptText,
   Settings,
   ShoppingCart,
   Truck,
@@ -15,6 +16,7 @@ import {
   Users,
   Warehouse,
 } from "lucide-react";
+import { ADMIN_ROLES } from "@/lib/auth/roles";
 import type { RoleName } from "@/lib/types/database";
 
 export interface NavLink {
@@ -52,6 +54,7 @@ export const dashboardNav: DashboardNavGroup[] = [
       { label: "Clients", href: "/dashboard/clients", icon: Users },
       { label: "Orders", href: "/dashboard/orders", icon: ShoppingCart },
       { label: "Deliveries", href: "/dashboard/deliveries", icon: Truck },
+      { label: "Quotations", href: "/dashboard/quotations", icon: ReceiptText },
       { label: "Statements", href: "/dashboard/statements", icon: FileText },
     ],
   },
@@ -75,7 +78,7 @@ export const dashboardNav: DashboardNavGroup[] = [
     links: [
       { label: "Feedback", href: "/dashboard/feedback", icon: MessageSquare },
       { label: "Activity Log", href: "/dashboard/activity", icon: Activity },
-      { label: "Users", href: "/dashboard/users", icon: UserCog, roles: ["admin", "dev"] },
+      { label: "Users", href: "/dashboard/users", icon: UserCog, roles: ADMIN_ROLES },
       { label: "Settings", href: "/dashboard/settings", icon: Settings },
     ],
   },
