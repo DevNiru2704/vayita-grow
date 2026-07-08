@@ -22,7 +22,7 @@ export default async function PublicFeedbackPage(
 ) {
   const searchParams = await props.searchParams;
   const roleParam = paramString(searchParams, "role");
-  const role = PUBLIC_FEEDBACK_ROLES.includes(roleParam) ? roleParam : undefined;
+  const role = roleParam && PUBLIC_FEEDBACK_ROLES.includes(roleParam) ? roleParam : undefined;
 
   const page = await getPublicFeedback({
     page: paramNumber(searchParams, "page"),

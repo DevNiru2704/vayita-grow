@@ -22,7 +22,8 @@ export default async function ContactInquiriesPage(
 ) {
   const searchParams = await props.searchParams;
   const subjectParam = paramString(searchParams, "subject");
-  const subject = CONTACT_SUBJECTS.includes(subjectParam) ? subjectParam : undefined;
+  const subject =
+    subjectParam && CONTACT_SUBJECTS.includes(subjectParam) ? subjectParam : undefined;
 
   const page = await getContactInquiries({
     page: paramNumber(searchParams, "page"),
