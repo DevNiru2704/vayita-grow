@@ -6,6 +6,7 @@ import type { FeedbackTicket } from "@/lib/types/feedback";
 import type { FieldReport } from "@/lib/types/field-report";
 import type { InventoryLog, InventoryRecord, Supplier } from "@/lib/types/inventory";
 import type { Order, OrderItem, Payment } from "@/lib/types/order";
+import type { Quotation, QuotationItem } from "@/lib/types/quotation";
 import type { SystemSetting } from "@/lib/types/settings";
 import type { Statement } from "@/lib/types/statement";
 import type { LoginHistoryEntry, User } from "@/lib/types/user";
@@ -13,6 +14,7 @@ import { seedCategories, seedProducts, type SeedProduct } from "./catalog";
 import { seedCustomerNotes, seedCustomers } from "./customers";
 import { seedInventory, seedInventoryLogs, seedSuppliers } from "./inventory";
 import { seedActivityLogs, seedFeedback, seedFieldReports, seedSettings, seedStatements } from "./ops";
+import { seedQuotations } from "./quotations";
 import { seedOrders } from "./sales";
 import { seedCredentials, seedLoginHistory, seedUsers, type DemoCredential } from "./users";
 
@@ -32,6 +34,8 @@ export interface MockDb {
   payments: Payment[];
   deliveries: Delivery[];
   deliveryUpdates: DeliveryUpdate[];
+  quotations: Quotation[];
+  quotationItems: QuotationItem[];
   statements: Statement[];
   fieldReports: FieldReport[];
   feedback: FeedbackTicket[];
@@ -115,6 +119,28 @@ export function buildSeedDb(): MockDb {
     }
   }
 
+  // Expand declarative quotations into rows with locked unit prices + totals.
+  const quotations: Quotation[] = [];
+  const quotationItems: QuotationItem[] = [];
+  let quotationItemId = 1;
+  for (const seed of seedQuotations) {
+    let totalAmount = 0;
+    for (const item of seed.items) {
+      const unitPrice = priceByProductId.get(item.productId) ?? 0;
+      totalAmount += unitPrice * item.quantity;
+      quotationItems.push({
+        itemId: quotationItemId++,
+        quotationId: seed.quotationId,
+        productId: item.productId,
+        quantity: item.quantity,
+        unitPrice,
+      });
+    }
+    const { items: _items, ...rest } = seed;
+    void _items;
+    quotations.push({ ...rest, totalAmount });
+  }
+
   return {
     // structuredClone: keep the pristine seed modules immutable so mutations
     // only ever touch the per-process database instance.
@@ -133,6 +159,8 @@ export function buildSeedDb(): MockDb {
     payments,
     deliveries,
     deliveryUpdates,
+    quotations,
+    quotationItems,
     statements: structuredClone(seedStatements),
     fieldReports: structuredClone(seedFieldReports),
     feedback: structuredClone(seedFeedback),
