@@ -15,8 +15,10 @@ import { getSession } from "@/lib/auth/session";
 import { formatINR, formatNumber, formatDate } from "@/lib/format";
 import {
   getDashboardStats,
+  getAvailableYears,
   getLowStockItems,
   getMonthlyOrderSeries,
+  type MonthlyOrderPoint,
 } from "@/lib/services/dashboard";
 import { getRecentOrders } from "@/lib/services/dashboard";
 import { getOrderStats } from "@/lib/services/orders";
@@ -24,15 +26,25 @@ import { ORDER_STATUSES } from "@/lib/types/database";
 
 const STAT_ICONS = [Users, ShoppingCart, FileText, ClipboardList];
 
+/** Server action: refetch the 12-month series for a given year (called from DashboardCharts). */
+async function fetchYearSeries(year: number): Promise<MonthlyOrderPoint[]> {
+  "use server";
+  return getMonthlyOrderSeries(year);
+}
+
 export default async function DashboardOverviewPage() {
-  const [session, stats, series, orderStats, recentOrders, lowStock] = await Promise.all([
-    getSession(),
-    getDashboardStats(),
-    getMonthlyOrderSeries(),
-    getOrderStats(),
-    getRecentOrders(6),
-    getLowStockItems(5),
-  ]);
+  const currentYear = new Date().getFullYear();
+
+  const [session, stats, availableYears, series, orderStats, recentOrders, lowStock] =
+    await Promise.all([
+      getSession(),
+      getDashboardStats(),
+      getAvailableYears(),
+      getMonthlyOrderSeries(currentYear),
+      getOrderStats(),
+      getRecentOrders(6),
+      getLowStockItems(5),
+    ]);
 
   const statusData = ORDER_STATUSES.map((status) => ({
     status,
@@ -58,7 +70,13 @@ export default async function DashboardOverviewPage() {
         ))}
       </div>
 
-      <DashboardCharts series={series} status={statusData} />
+      <DashboardCharts
+        series={series}
+        status={statusData}
+        availableYears={availableYears}
+        defaultYear={currentYear}
+        fetchYearSeries={fetchYearSeries}
+      />
 
       <div className="grid gap-4 lg:grid-cols-3">
         <section

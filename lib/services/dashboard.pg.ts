@@ -27,17 +27,25 @@ export async function getDashboardStats(): Promise<DashboardStat[]> {
   ];
 }
 
-/** Orders/revenue per month for the trailing 6 months, derived from real order rows. */
-export async function getMonthlyOrderSeries(): Promise<MonthlyOrderPoint[]> {
+/** Years that have at least one non-cancelled order in the database. */
+export async function getAvailableYears(): Promise<number[]> {
+  const rows = await query<{ yr: number }>(
+    "SELECT DISTINCT EXTRACT(YEAR FROM created_at)::int AS yr FROM orders WHERE status <> 'Cancelled' ORDER BY yr DESC",
+  );
+  const years = rows.map((r) => r.yr);
+  return years.length ? years : [new Date().getFullYear()];
+}
+
+/** All 12 months (Jan–Dec) for the given year, zero-filled where there are no orders. */
+export async function getMonthlyOrderSeries(year: number): Promise<MonthlyOrderPoint[]> {
   const orders = await query<{ createdAt: string; totalAmount: number }>(
     "SELECT created_at, total_amount FROM orders WHERE status <> 'Cancelled'",
   );
   const points: MonthlyOrderPoint[] = [];
-  const now = new Date();
 
-  for (let offset = 5; offset >= 0; offset--) {
-    const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - offset, 1));
-    const prefix = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+  for (let month = 0; month < 12; month++) {
+    const date = new Date(Date.UTC(year, month, 1));
+    const prefix = `${year}-${String(month + 1).padStart(2, "0")}`;
     const inMonth = orders.filter((o) => o.createdAt.startsWith(prefix));
     points.push({
       month: date.toLocaleString("en-IN", { month: "short", timeZone: "UTC" }),

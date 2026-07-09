@@ -241,15 +241,35 @@ function Chart({ id, series, status }: { id: ChartId; series: MonthlyOrderPoint[
 }
 
 export function DashboardCharts({
-  series,
+  series: initialSeries,
   status,
+  availableYears,
+  defaultYear,
+  fetchYearSeries,
 }: {
   series: MonthlyOrderPoint[];
   status: StatusDatum[];
+  availableYears: number[];
+  defaultYear: number;
+  fetchYearSeries: (year: number) => Promise<MonthlyOrderPoint[]>;
 }) {
   const [selected, setSelected] = useState<ChartId>("revenue-area");
   const [exporting, setExporting] = useState(false);
+  const [year, setYear] = useState(defaultYear);
+  const [series, setSeries] = useState(initialSeries);
+  const [loadingYear, setLoadingYear] = useState(false);
   const exportRef = useRef<HTMLDivElement>(null);
+
+  async function changeYear(newYear: number) {
+    setYear(newYear);
+    setLoadingYear(true);
+    try {
+      const data = await fetchYearSeries(newYear);
+      setSeries(data);
+    } finally {
+      setLoadingYear(false);
+    }
+  }
 
   async function exportPdf() {
     if (!exportRef.current) return;
@@ -316,11 +336,30 @@ export function DashboardCharts({
 
   return (
     <section aria-labelledby="analytics-heading" className="rounded-xl border bg-card p-5">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <h2 id="analytics-heading" className="font-sans text-base font-semibold">
           Analytics
         </h2>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Year selector */}
+          <label className="sr-only" htmlFor="chart-year">
+            Year
+          </label>
+          <select
+            id="chart-year"
+            value={year}
+            onChange={(e) => changeYear(Number(e.target.value))}
+            disabled={loadingYear}
+            className="h-9 w-24 shrink-0 rounded-lg border border-input bg-background px-3 text-sm font-medium focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none disabled:opacity-60"
+          >
+            {availableYears.map((y) => (
+              <option key={y} value={y}>
+                {y}
+              </option>
+            ))}
+          </select>
+
+          {/* Chart type selector */}
           <label className="sr-only" htmlFor="chart-type">
             Chart type
           </label>
@@ -328,7 +367,7 @@ export function DashboardCharts({
             id="chart-type"
             value={selected}
             onChange={(e) => setSelected(e.target.value as ChartId)}
-            className="h-9 rounded-lg border border-input bg-background px-3 text-sm font-medium focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+            className="h-9 min-w-0 flex-1 rounded-lg border border-input bg-background px-3 text-sm font-medium focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
           >
             {CHART_TYPES.map((t) => (
               <option key={t.id} value={t.id}>
@@ -336,14 +375,20 @@ export function DashboardCharts({
               </option>
             ))}
           </select>
-          <Button type="button" variant="outline" onClick={exportPdf} disabled={exporting}>
+
+          <Button type="button" variant="outline" onClick={exportPdf} disabled={exporting} className="shrink-0">
             <FileDown aria-hidden data-icon="inline-start" />
             {exporting ? "Exporting…" : "Export PDF"}
           </Button>
         </div>
       </div>
 
-      <div className="h-[320px] w-full">
+      <div className="relative h-[320px] w-full">
+        {loadingYear && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-background/60 backdrop-blur-[2px]">
+            <span className="text-sm text-muted-foreground">Loading {year}…</span>
+          </div>
+        )}
         <Chart id={selected} series={series} status={status} />
       </div>
 
