@@ -92,6 +92,28 @@ export default async function LoginPage(props: PageProps<"/login">) {
 
           <LoginForm from={from} />
 
+          <div className="rounded-lg border bg-muted/50 p-4 text-sm leading-relaxed text-muted-foreground">
+            <p className="font-medium text-foreground">Restricted access</p>
+            <p className="mt-1">
+              This portal is intended for {company.shortName} administrators and staff only. If you
+              are a dealer, distributor, or customer, please return to our website to{" "}
+              <Link
+                href="/contact"
+                className="rounded-sm font-medium text-brand-600 underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+              >
+                submit an enquiry
+              </Link>{" "}
+              or{" "}
+              <Link
+                href="/feedback"
+                className="rounded-sm font-medium text-brand-600 underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+              >
+                share your feedback
+              </Link>
+              .
+            </p>
+          </div>
+
           <p className="text-center text-sm">
             <Link
               href="/"
